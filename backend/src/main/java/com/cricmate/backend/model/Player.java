@@ -4,6 +4,8 @@ package com.cricmate.backend.model;
 
 // used for mapping java classes to tables in db
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -25,7 +27,7 @@ public class Player{
 
     )
     @JsonBackReference // prevents infinite recursion - data store ok hua hai but player sees team, team sees player in data
-    private Set<Team> teams;
+    private Set<Team> teams = new HashSet<>(); // initialization
 
     
     public int getPlayer_id(){

@@ -1,6 +1,8 @@
 package com.cricmate.backend.model;
 
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -15,8 +17,15 @@ public class Team {
     // Many-to-Many mapped by teams field in Player
     @ManyToMany(mappedBy = "teams")
     @JsonBackReference // prevents infinite recursion
-    private Set<Player> players;
+    private Set<Player> players = new HashSet<>(); 
     
+    // constructors created for stuff like dto
+    public Team() {
+    } // required by JPA - why?
+
+    public Team(String team_name){
+        this.team_name = team_name;
+    }
     // Getters & Setters
     public int getTeam_id() {
         return team_id;
