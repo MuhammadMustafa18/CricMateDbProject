@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 // import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,15 +44,28 @@ public class Match {
     // matchDate → Java field name (camelCase, standard in Java).
     // "match_date" → database column name (snake_case, often used in SQL).
     @Column(name = "match_date")
-    private LocalDateTime match_date;   
+    private LocalDateTime MatchDate;   
     
     // one match many innings
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL) // innings entity has a field called match that owns the relationship
+    @JsonManagedReference
     private List<Innings> innings;
     // This tells JPA: “don’t create a separate join table; use the match_id foreign
     // key in the Innings table.”
     // any operation on Match (save, delete, update) will automatically propagate to
     // all its innings.
+
+    private String matchState; // public enum MatchState { UPCOMING, ONGOING, COMPLETED, ABANDONED, NO_RESULT }
+
+    @ManyToOne
+    @JoinColumn(name = "toss_winner_team_id")
+    private Team tossWinnerTeam;
+
+    private String tossDecision; // yahan value in? public enum TossDecision { BAT, FIELD }
+
+    @ManyToOne
+    @JoinColumn(name = "match_winner_team_id")
+    private Team matchWinnerTeam;
 
     // Getters & Setters
     public int getMatch_id() {
@@ -85,12 +100,12 @@ public class Match {
         this.venue = venue;
     }
 
-    public LocalDateTime getMatch_date() {
-        return match_date;
+    public LocalDateTime getMatchDate() {
+        return MatchDate;
     }
 
-    public void setMatch_date(LocalDateTime match_date) {
-        this.match_date = match_date;
+    public void setMatchDate(LocalDateTime match_date) {
+        this.MatchDate = match_date;
     }
 
     public List<Innings> getInnings() {
@@ -100,4 +115,35 @@ public class Match {
     public void setInnings(List<Innings> innings) {
         this.innings = innings;
     }
+
+    public Team getTossWinnerTeam(){
+        return this.tossWinnerTeam;
+    }
+    
+    public Team getMatchWinnerTeam() {
+        return this.matchWinnerTeam;
+    }
+    public String getTossDecision(){
+        return this.tossDecision;
+    }
+    public String getMatchState(){
+        return this.matchState;
+    }
+    
+    public void setTossWinnerTeam(Team tossWinnerTeam) {
+        this.tossWinnerTeam = tossWinnerTeam;
+    }
+
+    public void setMatchWinnerTeam(Team matchWinnerTeam) {
+        this.matchWinnerTeam = matchWinnerTeam;
+    }
+
+    public void setTossDecision(String tossDecision) {
+        this.tossDecision = tossDecision;
+    }
+
+    public void setMatchState(String matchState) {
+        this.matchState = matchState;
+    }
+
 }

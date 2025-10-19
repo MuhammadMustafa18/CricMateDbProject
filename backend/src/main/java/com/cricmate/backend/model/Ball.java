@@ -1,5 +1,7 @@
 package com.cricmate.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +13,7 @@ public class Ball {
 
     @ManyToOne
     @JoinColumn(name = "innings_id")
+    @JsonBackReference
     private Innings innings;
 
     @ManyToOne

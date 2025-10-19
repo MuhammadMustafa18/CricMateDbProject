@@ -5,6 +5,9 @@ import java.util.List;
 // import com.cricmate.backend.model.Ball;
 // import org.aspectj.weaver.ast.Not;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 public class Innings {
 
@@ -15,6 +18,7 @@ public class Innings {
     // foriegn key, and this actually owns the relationship ie will update the db
     @ManyToOne
     @JoinColumn(name = "match_id")
+    @JsonBackReference
     private Match match;
 
 
@@ -30,13 +34,16 @@ public class Innings {
     @ManyToOne
     @JoinColumn(name = "bowling_team_id")
     private Team bowlingTeam;
-
+    // are primitive types (int and float), they cannot store null in Java — they
+    // always default to 0.
     private int totalRuns;
     private int wickets;
     private float overs;
+    // for nll: private Integer totalRuns;
 
     // owning side is a field named innings in the balls table
     @OneToMany(mappedBy = "innings", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Ball> balls;
 
     // Getters & Setters
