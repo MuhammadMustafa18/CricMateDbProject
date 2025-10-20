@@ -27,7 +27,8 @@ public class BallController {
         return ballService.getAllBalls();
     }
 }
-
+// TODO: FILHAL NO CHECKS ON PLAYERS ACTUALLY BELONGING TO THAT SPECIFIC TEAM OR NOT
+// ALSO NO CHECK ON LEGAL DELIVERY'S IMPACT ON STATS AND STUFF
 // POST
 // {
 //   "innings": { "innings_id": 1 },

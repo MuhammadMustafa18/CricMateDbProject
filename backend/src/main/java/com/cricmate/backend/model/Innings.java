@@ -36,9 +36,10 @@ public class Innings {
     private Team bowlingTeam;
     // are primitive types (int and float), they cannot store null in Java — they
     // always default to 0.
-    private int totalRuns;
-    private int wickets;
-    private float overs;
+    // this should depend on ball by ball right? ke ball by ball for each innings gets summed up
+    // private int totalRuns;
+    // private int wickets;
+    // private float overs;
     // for nll: private Integer totalRuns;
 
     // owning side is a field named innings in the balls table
@@ -79,29 +80,29 @@ public class Innings {
         this.bowlingTeam = bowlingTeam;
     }
 
-    public int getTotalRuns() {
-        return totalRuns;
-    }
+    // public int getTotalRuns() {
+    //     return totalRuns;
+    // }
 
-    public void setTotalRuns(int totalRuns) {
-        this.totalRuns = totalRuns;
-    }
+    // public void setTotalRuns(int totalRuns) {
+    //     this.totalRuns = totalRuns;
+    // }
 
-    public int getWickets() {
-        return wickets;
-    }
+    // public int getWickets() {
+    //     return wickets;
+    // }
 
-    public void setWickets(int wickets) {
-        this.wickets = wickets;
-    }
+    // public void setWickets(int wickets) {
+    //     this.wickets = wickets;
+    // }
 
-    public float getOvers() {
-        return overs;
-    }
+    // public float getOvers() {
+    //     return overs;
+    // }
 
-    public void setOvers(float overs) {
-        this.overs = overs;
-    }
+    // public void setOvers(float overs) {
+    //     this.overs = overs;
+    // }
 
     public List<Ball> getBalls() {
         return balls;

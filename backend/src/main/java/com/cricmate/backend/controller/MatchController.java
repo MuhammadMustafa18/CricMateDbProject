@@ -76,3 +76,12 @@ public class MatchController {
 //         "innings": []
 //     }
 // ]
+
+// {
+//    "teamA": { "team_id": 3 },
+//    "teamB": { "team_id": 5 },
+//    "matchDate": "2025-10-19T16:00:00",
+//    "venue": "karachi",
+//    "tossWinnerTeam": { "team_id": 3 },
+//    "tossDecision": "bat"
+// }
