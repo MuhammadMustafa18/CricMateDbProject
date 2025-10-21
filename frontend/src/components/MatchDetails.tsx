@@ -1,42 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Player, Ball, Team, Innings, Match } from "../types";
 
-export interface Player {
-  player_id: number;
-  player_name: string
-}
-export interface Ball {
-  overNumber: number;
-  ballNumber: number;
-  batsman: Player;
-  bowler: Player;
-  runs: number;
-  wicket: boolean;
-}
-export interface Team {
-  team_id: number;
-  team_name: string;
-}
-
-export interface Innings {
-  battingTeam: Team;
-  bowlingTeam: Team;
-  balls: Ball[];
-}
-
-export interface Match {
-  match_id: number;
-  matchState?: string;
-  matchDate?: string;
-  venue?: string;
-  tournament?: string;
-  tossWinnerTeam?: Team | null;
-  tossDecision?: string;
-  result?: string;
-  teamA?: Team;
-  teamB?: Team;
-  innings?: Innings[];
-}
 function MatchDetails() {
   const { id } = useParams(); // how does it know? - it probably matches the name
     /* <Route path="/match/:id" element={<MatchDetails />} /> */
@@ -95,7 +60,7 @@ function MatchDetails() {
       {match.innings?.map((inn, i) => (
         <div
           key={i}
-          className="mt-6 border border-zinc-700 rounded-lg p-4 bg-zinc-900"
+          className="mt-6 border border-zinc-700 rounded-lg py-4 bg-zinc-900"
         >
           <h2 className="text-lg font-bold mb-2 text-white">
             {inn.battingTeam.team_name} Innings
@@ -104,53 +69,50 @@ function MatchDetails() {
           {inn.balls && inn.balls.length > 0 ? (
             Object.entries(
               inn.balls.reduce((acc: any, ball) => {
-                const over = ball.overNumber;
-                if (!acc[over]) acc[over] = [];
-                acc[over].push(ball);
+                const overNumber = ball.overNumber;
+                if (!acc[overNumber]) acc[overNumber] = [];
+                acc[overNumber].push(ball);
                 return acc;
               }, {})
             )
-              .sort((a, b) => Number(b[0]) - Number(a[0])) // latest over first
+              .sort((a, b) => Number(b[0]) - Number(a[0]))
               .map(([over, balls]: any) => (
                 <div key={over} className="mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-yellow-400 w-12">
-                      Over {over}
-                    </span>
-                    <div className="flex gap-2">
-                      {balls.map((ball: any) => (
-                        <span
-                          key={ball.ball_id}
-                          className={`px-2 py-1 rounded text-sm ${
-                            ball.wicket
-                              ? "bg-red-600"
-                              : ball.runs === 4
-                              ? "bg-green-600"
-                              : ball.runs === 6
-                              ? "bg-blue-600"
-                              : "bg-zinc-700"
-                          }`}
-                        >
-                          {ball.wicket ? "W" : ball.runs}
-                        </span>
-                      ))}
+                  {balls.length >= 6 ? (
+                    <div className="uppercase bg-green-700">
+                      <div className="px-3 my-3">End of over {over}</div>
                     </div>
-                  </div>
-
-                  <div className="text-xs text-gray-400 ml-12 mt-1">
-                    {balls.map((ball: any) => (
-                      <div key={ball.ball_id}>
-                        {`${ball.bowler.player_name} to ${
-                          ball.batsman.player_name
-                        }, ${
-                          ball.wicket
-                            ? "OUT!"
-                            : ball.runs === 0
-                            ? "no run"
-                            : `${ball.runs} run${ball.runs > 1 ? "s" : ""}`
-                        }`}
-                      </div>
-                    ))}
+                  ) : null}
+                  <div className="flex px-3 flex-col gap-y-3">
+                    {balls
+                      .sort(
+                        (a: Ball, b: Ball) =>
+                          Number(b.ballNumber) - Number(a.ballNumber)
+                      )
+                      .map((ball: any) => (
+                        <div className="flex flex-row gap-x-3 items-center">
+                          <div className="text-xs">
+                            {`${over}.${ball.ballNumber}`}
+                          </div>
+                          <div
+                            key={ball.ball_id}
+                            className={`px-4 py-3 rounded text-sm font-bold ${
+                              ball.wicket
+                                ? "bg-red-600"
+                                : ball.runs === 4
+                                ? "bg-green-600"
+                                : ball.runs === 6
+                                ? "bg-blue-600"
+                                : "bg-zinc-700"
+                            }`}
+                          >
+                            {`${ball.wicket ? "W" : ball.runs}`}
+                          </div>
+                          <div className="text-sm">
+                            {`${ball.bowler.player_name} to ${ball.batsman.player_name}`}
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
               ))
