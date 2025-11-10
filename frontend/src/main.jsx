@@ -6,18 +6,18 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MatchDetails from './components/MatchDetails.tsx';
 import RecentMatches from './components/RecentMatches.jsx';
 import Navbar from './components/Navbar.jsx';
+import FullNavbar from './components/FullNavbar.tsx';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <div className=''>
-        <RecentMatches />
-        <Navbar />
-      </div>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/match/:id" element={<MatchDetails />} />
-      </Routes>
+      <FullNavbar/>
+       
+
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/match/:id" element={<MatchDetails />} />
+        </Routes>
     </BrowserRouter>
   </StrictMode>
 );

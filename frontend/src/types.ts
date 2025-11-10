@@ -4,6 +4,7 @@ export interface Player {
 }
 
 export interface Ball {
+  ball_id: number
   overNumber: number;
   ballNumber: number;
   batsman: Player;
@@ -18,6 +19,7 @@ export interface Team {
 }
 
 export interface Innings {
+  innings_id: number;
   battingTeam: Team;
   bowlingTeam: Team;
   balls: Ball[];

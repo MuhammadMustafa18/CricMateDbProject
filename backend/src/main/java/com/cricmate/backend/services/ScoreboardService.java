@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.cricmate.backend.dto.BattingStatsSimple;
 import com.cricmate.backend.repository.BallRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ScoreboardService {
     //     scoreboard.put("batting", ballRepository.getBattingStats(inningsId));
     //     return scoreboard;
     // }
-    public List<String> getScoreboard(int inningsId) {
-        return ballRepository.getBatsmanNames(inningsId);
+    public List<BattingStatsSimple> getScoreboard(int inningsId) {
+        return ballRepository.getBatsmanStats(inningsId);
     }
 }
