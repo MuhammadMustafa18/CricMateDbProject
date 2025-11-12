@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.cricmate.backend.dto.BattingStatsSimple;
+import com.cricmate.backend.dto.BowlingStatsDTO;
 import com.cricmate.backend.model.Ball;
 import java.util.List;
 
@@ -41,4 +42,21 @@ public interface BallRepository extends JpaRepository<Ball, Integer> {
     //  "WHERE b.innings.innings_id = :inningsId" 
     // )
     // List<String> getBatsmanNames(@Param("inningsId") int inningsId);
+
+    @Query("SELECT new com.cricmate.backend.dto.BowlingStatsDTO( " +
+            "b.bowler.player_id, " +
+            "b.bowler.player_name, " +
+            "SUM(b.runs), " + // total runs conceded
+            "COUNT(b.ball_id), " + // total balls bowled
+            "COUNT(CASE WHEN b.isWicket = true THEN 1 END), " + // wickets taken
+            "SUM(CASE WHEN b.runs = 4 THEN 1 ELSE 0 END), " + // number of fours conceded
+            "SUM(CASE WHEN b.runs = 6 THEN 1 ELSE 0 END), " +
+            "(SUM(b.runs)/(COUNT(b.ball_id)/6.0)) " + // economy
+            ") " +
+            "FROM Ball b " +
+            "WHERE b.innings.innings_id = :inningsId " +
+            "GROUP BY b.bowler.player_id, b.bowler.player_name")
+    List<BowlingStatsDTO> getBowlerStats(@Param("inningsId") int inningsId);
+        
+    
 }

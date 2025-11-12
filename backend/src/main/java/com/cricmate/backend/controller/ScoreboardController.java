@@ -17,9 +17,14 @@ import lombok.RequiredArgsConstructor;
 public class ScoreboardController {
     private final ScoreboardService scoreboardService;
     
-    @GetMapping("/{inningsId}")
-    public ResponseEntity<?> getScoreboard(@PathVariable int inningsId) {
-        return ResponseEntity.ok(scoreboardService.getScoreboard(inningsId));
+    @GetMapping("/batsman/{inningsId}")
+    public ResponseEntity<?> getScoreboardBatsman(@PathVariable int inningsId) {
+        return ResponseEntity.ok(scoreboardService.getScoreboardBatsman(inningsId));
+    }
+    
+    @GetMapping("/bowler/{inningsId}")
+    public ResponseEntity<?> getScoreboardBowler(@PathVariable int inningsId) {
+        return ResponseEntity.ok(scoreboardService.getScoreboardBowler(inningsId));
     }
     // response entity sends both response body and HTTP status code
 }
