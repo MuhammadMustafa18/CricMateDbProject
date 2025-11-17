@@ -59,12 +59,12 @@ export default function AddPlayerPage() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:8080/player", {
+      const res = await fetch("http://localhost:8080/players", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           player_name: playerName,
-          team_ids: selectedTeamIds,
+          teams: selectedTeamIds.map((id) => ({ team_id: id })), // ✅ Send team objects
         }),
       });
 
@@ -137,13 +137,14 @@ export default function AddPlayerPage() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0 bg-black">
-                  <Command>
+                  <Command className="bg-black text-white">
                     <CommandInput placeholder="Search teams..." />
                     <CommandList>
                       <CommandEmpty>No team found.</CommandEmpty>
                       <CommandGroup>
                         {teams.map((team) => (
                           <CommandItem
+                            className="text-white"
                             key={team.team_id}
                             value={team.team_name}
                             onSelect={() => toggleTeamSelection(team.team_id)}
@@ -170,6 +171,19 @@ export default function AddPlayerPage() {
             </FieldDescription>
           </Field>
         </FieldSet>
+        <div className="flex flex-row gap-1">
+          {selectedTeamIds.map((id) => {
+            const team = teams.find((t) => t.team_id === id);
+            return team ? (
+              <div
+                key={id}
+                className="px-2 py-1 border-2 border-zinc-400 rounded-lg"
+              >
+                {team.team_name}
+              </div>
+            ) : null;
+          })}
+        </div>
 
         <Button
           onClick={handleSubmit}

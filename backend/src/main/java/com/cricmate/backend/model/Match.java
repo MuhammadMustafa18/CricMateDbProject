@@ -39,6 +39,10 @@ public class Match {
     @JoinColumn(name = "team_b_id")
     private Team teamB;
 
+    @ManyToOne // Many matches can reference the referenced column
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
+
     private String venue;
 
     // matchDate → Java field name (camelCase, standard in Java).
@@ -128,6 +132,14 @@ public class Match {
     }
     public String getMatchState(){
         return this.matchState;
+    }
+    
+    public Tournament getTournament() {
+        return tournament;
+    }
+
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
     }
     
     public void setTossWinnerTeam(Team tossWinnerTeam) {

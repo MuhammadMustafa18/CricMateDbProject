@@ -13,7 +13,7 @@ function RecentMatches() {
   }, []);
 
   return (
-    <div className="bg-neutral-800 w-screen mx-auto text-white shadow-lg overflow-hidden p-5">
+    <div className="bg-neutral-800 w-[99%] mx-auto text-white shadow-lg overflow-hidden p-5">
       <h2 className="text-sm font-semibold border-b border-zinc-700 pb-2 mb-3">
         Recent Matches
       </h2>
@@ -52,7 +52,6 @@ function RecentMatches() {
         </ul>
       )}
     </div>
-    
   );
 }
 

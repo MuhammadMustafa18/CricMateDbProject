@@ -13,7 +13,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="bg-neutral-800 w-full shadow-md p-5 flex justify-between items-center">
+    <div className="bg-neutral-800 w-[99%] mx-auto shadow-md p-5 flex justify-between items-center">
       {/* Logo / Brand */}
       <Link href="/" className="text-3xl font-bold text-white">
         Cricmate

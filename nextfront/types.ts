@@ -3,6 +3,11 @@ export interface Player {
   player_name: string;
 }
 
+export interface Tournament {
+  tournament_id: number;
+  tournament_name: string;
+}
+
 export interface Ball {
   ball_id: number
   overNumber: number;
