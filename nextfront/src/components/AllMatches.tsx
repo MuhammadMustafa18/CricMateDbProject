@@ -1,5 +1,5 @@
 "use client";
-
+import { Team,Match } from "../../types";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,20 +10,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 
-interface Team {
-  team_id: number;
-  team_name: string;
-}
 
-interface Match {
-  match_id: number;
-  teamA: Team;
-  teamB: Team;
-  venue: string | null;
-  matchDate: string | null;
-  matchState: string | null;
-  matchWinnerTeam: Team | null;
-}
 
 export default function AllMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -51,7 +38,7 @@ export default function AllMatches() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
+    <div className="min-h-screen w-full bg-linear-to-br from-zinc-950 via-zinc-900 to-zinc-950">
       {/* Header */}
       <header className="border-zinc-800 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 pt-6">
@@ -105,7 +92,7 @@ export default function AllMatches() {
                     <div className="flex flex-col items-center gap-3">
                       <div className="text-center">
                         <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
-                          {match.teamA.team_name}
+                          {match.teamA?.team_name}
                         </h3>
                       </div>
 
@@ -115,7 +102,7 @@ export default function AllMatches() {
 
                       <div className="text-center">
                         <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
-                          {match.teamB.team_name}
+                          {match.teamB?.team_name}
                         </h3>
                       </div>
                     </div>

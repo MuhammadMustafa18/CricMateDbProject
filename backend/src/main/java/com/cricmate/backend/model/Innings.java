@@ -20,6 +20,10 @@ public class Innings {
     @JoinColumn(name = "match_id")
     @JsonBackReference
     private Match match;
+    // Innings has a @ManyToOne relationship with Match
+    // Innings table has a match_id foreign key column
+    // You need a valid match_id to create an innings
+    // so match owns the relationship?
 
 
     // foriegn key, no reverse mapping we did for for this tho
@@ -46,6 +50,7 @@ public class Innings {
     @OneToMany(mappedBy = "innings", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Ball> balls;
+   
 
     // Getters & Setters
     public int getInnings_id() {
@@ -112,3 +117,9 @@ public class Innings {
         this.balls = balls;
     }
 }
+
+// Innings has a @ManyToOne relationship with Match
+// Innings table has a match_id foreign key column
+// You need a valid match_id to create an innings
+
+

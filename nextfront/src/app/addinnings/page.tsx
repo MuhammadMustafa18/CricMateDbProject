@@ -25,30 +25,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Team, Match } from "../../../types";
 
-import { Tournament, Team } from "../../../types";
+// POST http://localhost:8080/innings
+// {
+//   "match": { "match_id": 1 },
+//   "battingTeam": { "team_id": 1 }, // foreign key
+//   "bowlingTeam": { "team_id": 2 },
 
-
-export default function AddMatchPage() {
+// }
+export default function addInnings(){
+  const [matchId, setMatchId] = useState<number | null>(null);
+  const [battingTeam, setBattingTeam] = useState<number | null>(null);
+  const [bowlingTeam, setBowlingTeam] = useState<number | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [teamA, setTeamA] = useState<number | null>(null);
-  const [teamB, setTeamB] = useState<number | null>(null);
-  const [tournament, setTournament] = useState<number | null>(null);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-
-
-  const [matchDate, setMatchDate] = useState("");
-  const [matchTime, setMatchTime] = useState("");
-  const [matchState, setMatchState] = useState("");
-  const [venue, setVenue] = useState("");
-
-  const [openA, setOpenA] = useState(false);
-  const [openB, setOpenB] = useState(false);
-  const [openC, setOpenC] = useState(false);
-
+  const [matches, setMatches] = useState<Match[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+    const [openA, setOpenA] = useState(false);
+    const [openB, setOpenB] = useState(false);
+    const [openC, setOpenC] = useState(false);
+
 
   // Fetch teams
   useEffect(() => {
@@ -63,19 +62,20 @@ export default function AddMatchPage() {
       }
     }
     fetchTeams();
-  }, []);
+  }, [matchId]);
+  // Fetch Matches
   useEffect(() => {
-    async function fetchTournaments() {
+    async function fetchMatches() {
       try {
-        const res = await fetch("http://localhost:8080/tournaments");
-        if (!res.ok) throw new Error("Failed to fetch Tournaments");
+        const res = await fetch("http://localhost:8080/matches");
+        if (!res.ok) throw new Error("Failed to fetch matches");
         const data = await res.json();
-        setTournaments(data);
+        setMatches(data);
       } catch (err) {
         console.error(err);
       }
     }
-    fetchTournaments();
+    fetchMatches();
   }, []);
 
   const handleSubmit = async () => {
@@ -83,21 +83,13 @@ export default function AddMatchPage() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:8080/matches", {
+      const res = await fetch("http://localhost:8080/innings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-        // tries creating an instance
-        //   teamA: teamA,
-        //   teamB: teamB,
-        teamA: { "team_id": teamA },
-        teamB: { "team_id": teamB },
-
-          matchDate: `${matchDate}T${matchTime}:00`,
-          matchState: matchState,
-          venue: venue,
-          tournament: { tournament_id: tournament }
-
+          match: { "match_id": matchId },
+          battingTeam: { "team_id": battingTeam }, // foreign key
+          bowlingTeam: { "team_id": bowlingTeam },
         }),
       });
 
@@ -105,16 +97,12 @@ export default function AddMatchPage() {
 
       const data = await res.json();
 
-      setMessage(
-        `Match added successfully! ID: ${data.match_id}`
-      );
+      setMessage(`Innings added successfully! ID: ${data.innings_id}`);
 
       // Reset
-      setTeamA(null);
-      setTeamB(null);
-      setMatchDate("");
-      setMatchTime("");
-      setMatchState("");
+      setBattingTeam(null);
+      setBowlingTeam(null);
+      setMatchId(null);
     } catch (err) {
       setMessage(`Error: ${err}`);
     } finally {
@@ -127,27 +115,72 @@ export default function AddMatchPage() {
     const t = teams.find((x) => x.team_id === teamId);
     return t?.team_name || "Select team...";
   };
-  const getTournamentLabel = (tournamentId: number | null) => {
-    if (!tournamentId) return "Select Tournament...";
-    const t = tournaments.find((x) => x.tournament_id === tournamentId);
-    return t?.tournament_name || "Select Tournament...";
+  const getMatchLabel = (matchid: number | null) => {
+    if (!matchid) return "Select Match...";
+    const t = matches.find((x) => x.match_id === matchid);
+    return t?.match_id || "Select Match...";
   };
-
   return (
     <div className="mt-70 max-w-lg mx-auto bg-black p-6 rounded-md text-white">
       <h1 className="text-3xl font-bold mb-6">Add a New Match</h1>
       <div className="flex flex-col gap-4">
         <FieldSet>
-          <FieldLegend>Add Match</FieldLegend>
+          <FieldLegend>Add Innings</FieldLegend>
           <FieldDescription>
-            Enter match details and select two teams.
+            Enter match id and select two teams.
           </FieldDescription>
 
           {/* Match Name */}
+          <Field>
+            <FieldLabel>Match</FieldLabel>
+            <FieldContent>
+              <Popover open={openC} onOpenChange={setOpenC}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between bg-black"
+                  >
+                    {getMatchLabel(matchId)}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0 bg-black text-white">
+                  <Command className="bg-black text-white">
+                    <CommandInput placeholder="Search team..." />
+                    <CommandList>
+                      <CommandEmpty>No Match found.</CommandEmpty>
+                      <CommandGroup>
+                        {matches.map((m) => (
+                          <CommandItem
+                            className="text-white"
+                            key={m.match_id}
+                            onSelect={() => {
+                              setMatchId(m.match_id);
+                              setOpenC(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                matchId === m.match_id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {m.match_id}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </FieldContent>
+          </Field>
 
           {/* Team A */}
           <Field>
-            <FieldLabel>Team A</FieldLabel>
+            <FieldLabel>Batting Team</FieldLabel>
             <FieldContent>
               <Popover open={openA} onOpenChange={setOpenA}>
                 <PopoverTrigger asChild>
@@ -155,7 +188,7 @@ export default function AddMatchPage() {
                     variant="outline"
                     className="w-full justify-between bg-black"
                   >
-                    {getTeamLabel(teamA)}
+                    {getTeamLabel(battingTeam)}
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -170,14 +203,14 @@ export default function AddMatchPage() {
                             className="text-white"
                             key={team.team_id}
                             onSelect={() => {
-                              setTeamA(team.team_id);
+                              setBattingTeam(team.team_id);
                               setOpenA(false);
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                teamA === team.team_id
+                                battingTeam === team.team_id
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -195,7 +228,7 @@ export default function AddMatchPage() {
 
           {/* Team B */}
           <Field>
-            <FieldLabel>Team B</FieldLabel>
+            <FieldLabel>Bowling Team</FieldLabel>
             <FieldContent>
               <Popover open={openB} onOpenChange={setOpenB}>
                 <PopoverTrigger asChild>
@@ -203,7 +236,7 @@ export default function AddMatchPage() {
                     variant="outline"
                     className="w-full justify-between bg-black"
                   >
-                    {getTeamLabel(teamB)}
+                    {getTeamLabel(bowlingTeam)}
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -218,14 +251,14 @@ export default function AddMatchPage() {
                             className="text-white"
                             key={team.team_id}
                             onSelect={() => {
-                              setTeamB(team.team_id);
+                              setBowlingTeam(team.team_id);
                               setOpenB(false);
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                teamB === team.team_id
+                                bowlingTeam === team.team_id
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -240,108 +273,15 @@ export default function AddMatchPage() {
               </Popover>
             </FieldContent>
           </Field>
-
-          {/* Match Date */}
-          <Field>
-            <FieldLabel>Date</FieldLabel>
-            <FieldContent>
-              <Input
-                type="date"
-                value={matchDate}
-                onChange={(e) => setMatchDate(e.target.value)}
-              />
-            </FieldContent>
-          </Field>
-
-          {/* Match Time */}
-          <Field>
-            <FieldLabel>Time</FieldLabel>
-            <FieldContent>
-              <Input
-                type="time"
-                value={matchTime}
-                onChange={(e) => setMatchTime(e.target.value)}
-              />
-            </FieldContent>
-          </Field>
-
-          {/* Match State */}
-          <Field>
-            <FieldLabel>Match State</FieldLabel>
-            <FieldContent>
-              <Input
-                placeholder="upcoming / live / finished"
-                value={matchState}
-                onChange={(e) => setMatchState(e.target.value)}
-              />
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldLabel>Match Venue</FieldLabel>
-            <FieldContent>
-              <Input
-                placeholder="upcoming / live / finished"
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-              />
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldLabel>Tournaments</FieldLabel>
-            <FieldContent>
-              <Popover open={openC} onOpenChange={setOpenC}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between bg-black"
-                  >
-                    {getTournamentLabel(tournament)}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0 bg-black text-white">
-                  <Command className="bg-black text-white">
-                    <CommandInput placeholder="Search team..." />
-                    <CommandList>
-                      <CommandEmpty>No Tournament found.</CommandEmpty>
-                      <CommandGroup>
-                        {tournaments.map((t) => (
-                          <CommandItem
-                            key={t.tournament_id}
-                            onSelect={() => {
-                              setTournament(t.tournament_id);
-                              setOpenC(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                tournament === t.tournament_id
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {t.tournament_name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </FieldContent>
-          </Field>
         </FieldSet>
 
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={!teamA || !teamB}
+          disabled={!matchId || !battingTeam || !bowlingTeam}
           className="mt-2"
         >
-          {loading ? "Adding..." : "Add Match"}
+          {loading ? "Adding..." : "Add Innings"}
         </Button>
 
         {message && <p className="mt-4">{message}</p>}

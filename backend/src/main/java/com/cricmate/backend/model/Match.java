@@ -59,6 +59,10 @@ public class Match {
     // any operation on Match (save, delete, update) will automatically propagate to
     // all its innings.
 
+    // Match table: Never updates when you add innings
+    // Innings table: Stores match_id foreign key pointing to match
+    // On fetch: JPA joins the tables automatically
+
     private String matchState; // public enum MatchState { UPCOMING, ONGOING, COMPLETED, ABANDONED, NO_RESULT }
 
     @ManyToOne
