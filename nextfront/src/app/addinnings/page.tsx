@@ -39,6 +39,7 @@ export default function addInnings(){
   const [battingTeam, setBattingTeam] = useState<number | null>(null);
   const [bowlingTeam, setBowlingTeam] = useState<number | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [matchTeams, setMatchTeams] = useState<Team[]>([])
   const [matches, setMatches] = useState<Match[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,22 @@ export default function addInnings(){
     }
     fetchMatches();
   }, []);
+
+  useEffect(()=>{
+    if(!matchId) return ;
+    const match = matches.find(m => m.match_id == matchId)
+    if (!match) return;
+
+    if (typeof match.teamA === "object" && match.teamA && match.teamB) {
+      setMatchTeams([match.teamA, match.teamB]);
+    }
+    // Case 2: teamA and teamB are IDs
+    else {
+      const tA = teams.find((t) => t.team_id === match.teamA?.team_id);
+      const tB = teams.find((t) => t.team_id === match.teamB?.team_id);
+      setMatchTeams([tA, tB].filter(Boolean) as Team[]);
+    }
+  },[matchId])
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -123,6 +140,9 @@ export default function addInnings(){
   return (
     <div className="mt-70 max-w-lg mx-auto bg-black p-6 rounded-md text-white">
       <h1 className="text-3xl font-bold mb-6">Add a New Match</h1>
+      {/* {matchTeams.map((team) => (
+        <div key={team.team_id}>{team.team_name}</div>
+      ))} */}
       <div className="flex flex-col gap-4">
         <FieldSet>
           <FieldLegend>Add Innings</FieldLegend>
@@ -198,7 +218,7 @@ export default function addInnings(){
                     <CommandList>
                       <CommandEmpty>No team found.</CommandEmpty>
                       <CommandGroup>
-                        {teams.map((team) => (
+                        {matchTeams.map((team) => (
                           <CommandItem
                             className="text-white"
                             key={team.team_id}
@@ -246,7 +266,7 @@ export default function addInnings(){
                     <CommandList>
                       <CommandEmpty>No team found.</CommandEmpty>
                       <CommandGroup>
-                        {teams.map((team) => (
+                        {matchTeams.map((team) => (
                           <CommandItem
                             className="text-white"
                             key={team.team_id}
