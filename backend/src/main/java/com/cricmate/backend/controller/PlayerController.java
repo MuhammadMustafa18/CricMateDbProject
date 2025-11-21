@@ -1,5 +1,6 @@
 package com.cricmate.backend.controller;
 
+import com.cricmate.backend.dto.FullPlayerDTO;
 import com.cricmate.backend.model.Player;
 // import com.cricmate.backend.repository.PlayerRepository;
 import com.cricmate.backend.services.PlayerService;
@@ -29,6 +30,10 @@ public class PlayerController {
     @GetMapping("/{id}")
     public Player getPlayer(@PathVariable int id) {
         return playerService.getPlayerById(id);
+    }
+    @GetMapping("/full/{id}")
+    public FullPlayerDTO getFullPlayer(@PathVariable int id) {
+        return playerService.getFullPlayerById(id); // maps entity → DTO with teams
     }
 
     @GetMapping

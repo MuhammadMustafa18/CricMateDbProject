@@ -3,6 +3,7 @@ package com.cricmate.backend.services;
 import org.springframework.stereotype.Service;
 
 import com.cricmate.backend.repository.PlayerRepository;
+import com.cricmate.backend.dto.FullPlayerDTO;
 import com.cricmate.backend.model.Player;
 import java.util.List;
 
@@ -27,5 +28,10 @@ public class PlayerService{
 
     public void deletePlayerById(Integer id) {
         playerRepository.deleteById(id);
+    }
+    public FullPlayerDTO getFullPlayerById(Integer id) {
+        Player player = playerRepository.findById(id)
+                          .orElseThrow(() -> new RuntimeException("Player not found"));
+        return new FullPlayerDTO(player); // map entity → DTO
     }
 }
