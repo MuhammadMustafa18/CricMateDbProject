@@ -22,4 +22,12 @@ public class MatchService {
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
     } 
+
+    public List<Match> getMatchesByTeamId(int teamId) {
+        return matchRepository.findMatchesByTeamId(teamId);
+    }
+
+    public List<Match> getMatchesByTournamentId(int tournamentId) {
+        return matchRepository.findMatchesByTournamentId(tournamentId);
+    } 
 }

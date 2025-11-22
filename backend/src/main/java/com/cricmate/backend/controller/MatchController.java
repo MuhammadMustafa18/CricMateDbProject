@@ -32,8 +32,17 @@ public class MatchController {
     public Match getMatchById(@PathVariable Integer id) {
         return matchService.getMatchById(id);
     }
-}
 
+    @GetMapping("/team/{teamId}")
+    public List<Match> getMatchesByTeamId(@PathVariable int teamId) {
+        return matchService.getMatchesByTeamId(teamId);
+    }
+
+    @GetMapping("/tournament/{tournamentId}")
+    public List<Match> getMatchesByTournamentId(@PathVariable int tournamentId) {
+        return matchService.getMatchesByTournamentId(tournamentId);
+    }
+}
 
 // Testing
 // POST

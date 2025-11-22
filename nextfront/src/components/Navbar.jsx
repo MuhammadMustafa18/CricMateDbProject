@@ -10,6 +10,7 @@ export default function Navbar() {
     { href: "/matches", label: "Matches" },
     { href: "/teams", label: "Teams" },
     { href: "/players", label: "Players" },
+    { href: "/tournaments", label: "Tournaments" },
   ];
 
   return (
@@ -25,11 +26,10 @@ export default function Navbar() {
           <Link
             key={link.href}
             href={link.href}
-            className={`text-xl font-bold ${
-              pathname === link.href
+            className={`text-xl font-bold ${pathname === link.href
                 ? "text-white"
                 : "text-gray-300 hover:text-white"
-            }`}
+              }`}
           >
             {link.label}
           </Link>

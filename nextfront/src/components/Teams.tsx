@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/item";
 
 interface CricketTeam {
-  name: string;
-  flag: string;
+  team_id: number;
+  team_name: string;
+  flag?: string;
+  name?: string;
 }
 
 export const metadata = {
@@ -84,18 +86,21 @@ export default function AllTeams() {
             <p className="text-zinc-400">Loading teams...</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {teams.map((team: any) => (
-                <div
+              {teams.map((team) => (
+                <Link
                   key={team.team_id || team.name}
-                  className="group cursor-pointer"
+                  href={`/team/${team.team_id}`}
+                  className="block"
                 >
-                  <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 hover:border-zinc-600 transition-all duration-200">
-                    <span className="text-4xl">{team.flag || "🏏"}</span>
-                    <span className="text-lg font-medium text-zinc-100 group-hover:text-white transition-colors">
-                      {team.team_name || team.name}
-                    </span>
+                  <div className="group cursor-pointer">
+                    <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 hover:border-zinc-600 transition-all duration-200">
+                      <span className="text-4xl">{team.flag || "🏏"}</span>
+                      <span className="text-lg font-medium text-zinc-100 group-hover:text-white transition-colors">
+                        {team.team_name || team.name}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

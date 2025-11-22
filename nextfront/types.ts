@@ -45,17 +45,13 @@ export interface Match {
   tournament?: Tournament;
   tossWinnerTeam?: Team | null;
   tossDecision?: string;
+  matchWinnerTeam?: Team | null;
   result?: string;
+  matchFormat?: string;
   teamA?: Team;
   teamB?: Team;
   innings?: Innings[];
 }
-
-export interface PlayerWithTeams {
-  player_id: number;
-  player_name: string;
-  teams: TeamWithPlayers[];
-};
 
 export interface TeamWithPlayers {
   team_id: number;
