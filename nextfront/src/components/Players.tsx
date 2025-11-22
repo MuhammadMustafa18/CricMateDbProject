@@ -86,13 +86,17 @@ export default function AllPlayers() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {players.map((player) => (
-                <div key={player.player_id} className="group cursor-pointer">
+                <Link
+                  key={player.player_id}
+                  href={`/player/${player.player_id}`} // your dynamic route
+                  className="group cursor-pointer"
+                >
                   <div className="p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 hover:border-zinc-600 transition-all duration-200">
                     <span className="text-lg font-medium text-zinc-100 group-hover:text-white">
                       {player.player_name}
                     </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -81,37 +81,40 @@ export default function AllMatches() {
           ) : matches.length === 0 ? (
             <p className="text-zinc-400">No matches found.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1  gap-4">
               {matches.map((match) => (
                 <div
                   key={match.match_id}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer hover:bg-zinc-700/50 transition-all duration-200 border-b border-zinc-700 last:border-b-0"
                   onClick={() => handleMatchClick(match.match_id)}
                 >
-                  <div className="p-6 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 hover:border-zinc-600 transition-all duration-200">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="text-center">
-                        <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
-                          {match.teamA?.team_name}
-                        </h3>
-                      </div>
-
-                      <div className="text-zinc-500 text-sm font-medium">
-                        VS
-                      </div>
-
-                      <div className="text-center">
-                        <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
-                          {match.teamB?.team_name}
-                        </h3>
-                      </div>
+                  <div className="flex items-center justify-between p-4">
+                    {/* Date */}
+                    <div className="w-28 text-center text-sm text-zinc-400">
+                      {match.matchDate}
                     </div>
 
-                    {match.venue && (
-                      <p className="text-sm text-zinc-400 text-center mt-4">
-                        📍 {match.venue}
-                      </p>
-                    )}
+                    {/* Team A */}
+                    <div className="flex-1 text-center">
+                      <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
+                        {match.teamA?.team_name}
+                      </h3>
+                    </div>
+
+                    {/* VS */}
+                    <div className="w-12 text-center text-zinc-500 font-medium">
+                      VS
+                    </div>
+
+                    {/* Team B */}
+                    <div className="flex-1 text-center">
+                      <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-white">
+                        {match.teamB?.team_name}
+                      </h3>
+                    </div>
+
+                    {/* Optional Venue */}
+                    
                   </div>
                 </div>
               ))}

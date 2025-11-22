@@ -20,4 +20,5 @@ public class BallService {
     public List<Ball> getAllBalls() {
         return ballRepository.findAll();
     }
+    
 }

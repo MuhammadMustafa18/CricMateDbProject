@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.cricmate.backend.model.Player;
-import com.cricmate.backend.model.Team;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,7 +36,7 @@ public class FullPlayerDTO {
         this.player_name = player.getPlayer_name();
         this.teams = player.getTeams().stream()
                 .map(team -> new TeamDto(
-                        team
+                        team // infers khudse
                 ))
                 .collect(Collectors.toSet());
     }

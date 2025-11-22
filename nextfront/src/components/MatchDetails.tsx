@@ -5,6 +5,7 @@ import { Player, Ball, Team, Innings, Match } from "../../types";
 import Commentary from "@/components/Commentary";
 import Scorecard from "@/components/Scorecard";
 import MatchSummary from "@/components/MatchSummary";
+import Link from "next/link";
 
 function MatchDetails() {
   const { id } = useParams(); // how does it know? - it probably matches the name
@@ -53,6 +54,13 @@ function MatchDetails() {
           >
             Commentary
           </div>
+          <Link
+            href={`/addinnings`} // your dynamic route
+            className={`px-4 py-2 text-white font-semibold transition cursor-pointer text-lg
+              `}
+          >
+            Add Innings
+          </Link>
         </div>
       </div>
 

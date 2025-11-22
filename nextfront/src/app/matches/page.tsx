@@ -1,6 +1,6 @@
 import AllMatches from "@/components/AllMatches";
 
-AllMatches
+
 
 
 export default function MatchessPage() {

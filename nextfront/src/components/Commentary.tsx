@@ -3,6 +3,29 @@ import { useEffect, useState } from "react";
 import { Ball, Innings, Player } from "../../types";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldSet,
+  FieldLegend,
+} from "@/components/ui/field";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type InningsState = {
   overNumber: number;
@@ -11,6 +34,8 @@ type InningsState = {
   bowler: number | null;
   runs: number;
   wicket: boolean;
+  allBatsmen: Player[];
+  allBowlers: Player[];
 };
 
 const initialState: InningsState = {
@@ -20,6 +45,9 @@ const initialState: InningsState = {
   bowler: null,
   runs: 0,
   wicket: false,
+  allBatsmen: [],
+  allBowlers: []
+
 };
 
 // POST
@@ -38,10 +66,72 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
     [id: number]: InningsState;
   }>({}); // like a map
   const [loading, setLoading] = useState(false);
+const [openC, setOpenC] = useState<{ [id: number]: boolean }>({});
+const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
+
   const [players, setPlayers] = useState<Player[]>([])
   useEffect(()=>{
-    
+
   })
+
+
+
+  
+  useEffect(() => {
+    if (!innings || innings.length === 0) return;
+
+    innings.forEach((inn) => {
+      (async () => {
+        try {
+          // Fetch Batsmen (batting team)
+          const batRes = await fetch(
+            `http://localhost:8080/teams/full/${inn.battingTeam.team_id}`
+          );
+          const battingData = await batRes.json(); // {id, name, playerIds:[]}
+
+          // Fetch Bowlers (bowling team)
+          const bowlRes = await fetch(
+            `http://localhost:8080/teams/full/${inn.bowlingTeam.team_id}`
+          );
+          const bowlingData = await bowlRes.json();
+          // Update innings state
+          setInningsState((prev) => ({
+            ...prev,
+            [inn.innings_id]: {
+              ...initialState,
+              allBatsmen: battingData.players,
+              allBowlers: bowlingData.players,
+            },
+          }));
+        } catch (err) {
+          console.error("Error loading players:", err);
+        }
+      })();
+    });
+  }, [innings]);
+
+  const getBowlerLabel = (innId: number, playerId: number | null) => {
+    if (!playerId) return "Select Bowler...";
+
+    const s = inningsState[innId];
+    if (!s) return "Select Bowler...";
+
+    const t = s.allBowlers.find((p) => p.player_id === playerId);
+
+
+    return t?.player_name || "Select Bowler...";
+  };
+  const getBatsmanLabel = (innId: number, playerId: number | null) => {
+    if (!playerId) return "Select Batsman...";
+
+    const s = inningsState[innId];
+    if (!s) return "Select Batsman...";
+
+    // Only look in allBatsmen
+    const t = s.allBatsmen.find((p) => p.player_id === playerId);
+
+    return t?.player_name || "Select Batsman...";
+  };
   async function handleSubmitBall(inningsId: number) {
     const state = inningsState[inningsId];
     if (!state || state.batsman === null || state.bowler === null) return;
@@ -129,27 +219,122 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
               >
                 {state.wicket ? "W" : state.runs}
               </div>
+              {/* Match Name */}
 
               <div className="flex items-center gap-2 text-sm">
-                <Input
-                  type="number"
-                  value={state.bowler || ""}
-                  onChange={(e) =>
-                    updateState({ bowler: Number(e.target.value) })
-                  }
-                  className="w-28 h-7 text-xs px-2 no-spinner"
-                  placeholder="Bowler"
-                />
+                <Field>
+                  <FieldContent>
+                    <Popover
+                      open={openC[inn.innings_id] || false}
+                      onOpenChange={(v) =>
+                        setOpenC((prev) => ({ ...prev, [inn.innings_id]: v }))
+                      }
+                    >
+                      {" "}
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-black"
+                        >
+                          {getBowlerLabel(inn.innings_id, state.bowler)}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0 bg-black text-white">
+                        <Command className="bg-black text-white">
+                          <CommandInput placeholder="Search bowler..." />
+                          <CommandList>
+                            <CommandEmpty>No Bowler found.</CommandEmpty>
+                            <CommandGroup>
+                              {(state.allBowlers ?? []).map((b) => (
+                                <CommandItem
+                                  className="text-white"
+                                  key={b.player_id}
+                                  onSelect={() => {
+                                    updateState({
+                                      bowler: Number(b.player_id),
+                                    });
+                                    setOpenC((prev) => ({
+                                      ...prev,
+                                      [inn.innings_id]: false,
+                                    }));
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      state.bowler === b.player_id
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {b.player_name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </FieldContent>
+                </Field>
                 <span>to</span>
-                <Input
-                  type="number"
-                  value={state.batsman || ""}
-                  onChange={(e) =>
-                    updateState({ batsman: Number(e.target.value) })
-                  }
-                  className="w-28 h-7 text-xs px-2"
-                  placeholder="Batsman"
-                />
+                <Field>
+                  <FieldContent>
+                    <Popover
+                      open={openB[inn.innings_id] || false}
+                      onOpenChange={(v) =>
+                        setOpenB((prev) => ({ ...prev, [inn.innings_id]: v }))
+                      }
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-black"
+                        >
+                          {getBatsmanLabel(inn.innings_id, state.batsman)}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-full p-0 bg-black text-white">
+                        <Command className="bg-black text-white">
+                          <CommandInput placeholder="Search batsman..." />
+                          <CommandList>
+                            <CommandEmpty>No Batsman found.</CommandEmpty>
+                            <CommandGroup>
+                              {(state.allBatsmen ?? []).map((b) => (
+                                <CommandItem
+                                  className="text-white"
+                                  key={b.player_id}
+                                  onSelect={() => {
+                                    updateState({
+                                      batsman: Number(b.player_id),
+                                    });
+                                    setOpenB((prev) => ({
+                                      ...prev,
+                                      [inn.innings_id]: false,
+                                    }));
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      state.batsman === b.player_id
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {b.player_name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </FieldContent>
+                </Field>
               </div>
 
               <span>Runs:</span>
@@ -189,7 +374,7 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
                 className="w-7 h-7 text-xs px-2 no-spinner"
               />
               <Button
-              className=""
+                className=""
                 onClick={() => handleSubmitBall(inn.innings_id)}
                 variant="destructive"
               >

@@ -1,4 +1,4 @@
-import { Player, Ball, Team, Innings, Match } from "../../types";
+import { Player, Ball, Team, Innings, Match, Tournament } from "../../types";
 
 export default function MatchSummary({match}: {match: Match}) {
     
@@ -7,7 +7,7 @@ export default function MatchSummary({match}: {match: Match}) {
         <div className="">Match State: {match.matchState || "State"}</div>
         <div className="text-sm font-bold mb-4">
           Match {match.match_id}, Date: {match.matchDate || "TBA"}, Venue:{" "}
-          {match.venue || "TBA"}, Tournament: {match.tournament || "TBA"}
+          {match.venue || "TBA"}, Tournament: {match.tournament?.tournament_name || "TBA"}
         </div>
         {/* does list incoming equate to array here? */}
         {Array.isArray(match.innings) && match.innings.length > 0 ? (

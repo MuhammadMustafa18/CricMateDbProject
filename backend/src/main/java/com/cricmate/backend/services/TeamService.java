@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.cricmate.backend.repository.PlayerRepository;
 import com.cricmate.backend.repository.TeamRepository;
 import com.cricmate.backend.model.Team;
+import com.cricmate.backend.dto.TeamDto;
 import com.cricmate.backend.model.Player;
 
 @Service
@@ -68,5 +69,10 @@ public class TeamService {
         // null pointer exception in team.getPlayers().add(player); 
         // cuz when we created a Team object, players set wasnt initialized, constructor only sets the name on creation of team
     
+    }
+    public TeamDto getTeamFull(Integer teamId){
+        Team team = teamRepository.findById(teamId)
+                  .orElseThrow(() -> new RuntimeException("Team not found"));
+        return new TeamDto(team); // map entity → DTO
     }
 }

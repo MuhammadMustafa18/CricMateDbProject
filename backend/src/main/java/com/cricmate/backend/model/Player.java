@@ -1,58 +1,53 @@
 package com.cricmate.backend.model;
 
-// import com.fasterxml.jackson.annotation.JsonProperty;
-
-// used for mapping java classes to tables in db
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.Setter;
 
-// entity marks this as a entity(table in db for this)
 @Entity
-public class Player{
-    @Id // mark this field as primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto increments
+@Getter
+@Setter
+public class Player {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int player_id;
+
     private String player_name;
+    private String full_name;
+    private String date_of_birth;
+    // private String age;
+    private String batting_style;
+    private String bowling_style;
+    private String playing_role;
 
-    // Many to Many with Team
     @ManyToMany
-    @JoinTable(
-        name = "Team_player",
-        joinColumns = @JoinColumn(name = "player_id"),
-        inverseJoinColumns =  @JoinColumn(name = "team_id")
+    @JoinTable(name = "Team_player", joinColumns = @JoinColumn(name = "player_id"), inverseJoinColumns = @JoinColumn(name = "team_id"))
+    @JsonBackReference
+    private Set<Team> teams = new HashSet<>();
 
-    )
-    @JsonBackReference // prevents infinite recursion - data store ok hua hai but player sees team, team sees player in data
-    private Set<Team> teams = new HashSet<>(); // initialization
-
-    
-    public int getPlayer_id(){
+    // You can keep custom getters/setters if needed
+    public int getPlayer_id() {
         return player_id;
     }
-    
-    public String getPlayer_name() {
-        return player_name;
-    }
-    public void setPlayer_id(int player_id){
+
+    public void setPlayer_id(int player_id) {
         this.player_id = player_id;
     }
-    // @JsonProperty("player_name")
-    public void setPlayer_name(String player_name){
-        this.player_name = player_name;
-    }
-    
-    public Set<Team> getTeams() {
-        return teams;
-    }
 
-    public void setTeams(Set<Team> teams) {
-        this.teams = teams;
-    }
+     // Compute age on the fly
+    @Transient
+    public String getAge() {
+        if (date_of_birth == null || date_of_birth.isEmpty()) return null;
 
+        LocalDate dob = LocalDate.parse(date_of_birth, DateTimeFormatter.ISO_DATE);
+        Period period = Period.between(dob, LocalDate.now());
+        return period.getYears() + "y " + period.getMonths() + "m " + period.getDays() + "d";
+    }
 }
-
-

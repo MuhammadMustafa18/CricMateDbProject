@@ -64,7 +64,7 @@ public class Match {
     // On fetch: JPA joins the tables automatically
 
     private String matchState; // public enum MatchState { UPCOMING, ONGOING, COMPLETED, ABANDONED, NO_RESULT }
-
+    private String matchFormat;
     @ManyToOne
     @JoinColumn(name = "toss_winner_team_id")
     private Team tossWinnerTeam;
@@ -156,6 +156,14 @@ public class Match {
 
     public void setTossDecision(String tossDecision) {
         this.tossDecision = tossDecision;
+    }
+
+    public void setMatchFormat(String matchFormat) {
+        this.matchFormat = matchFormat;
+    }
+    
+    public String getMatchFormat() {
+        return this.matchFormat;
     }
 
     public void setMatchState(String matchState) {

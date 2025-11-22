@@ -1,7 +1,14 @@
 export interface Player {
   player_id: number;
   player_name: string;
+  full_name: string;
+  age: string;
+  date_of_birth: string; // e.g., "1994-11-04"
+  batting_style: string; // e.g., "Left hand Bat"
+  bowling_style: string; // e.g., "Legbreak"
+  playing_role: string; // e.g., "Top order Batter"
 }
+
 
 export interface Tournament {
   tournament_id: number;
@@ -35,7 +42,7 @@ export interface Match {
   matchState?: string;
   matchDate?: string;
   venue?: string;
-  tournament?: string;
+  tournament?: Tournament;
   tossWinnerTeam?: Team | null;
   tossDecision?: string;
   result?: string;
@@ -43,3 +50,15 @@ export interface Match {
   teamB?: Team;
   innings?: Innings[];
 }
+
+export interface PlayerWithTeams {
+  player_id: number;
+  player_name: string;
+  teams: TeamWithPlayers[];
+};
+
+export interface TeamWithPlayers {
+  team_id: number;
+  team_name: string;
+  players: Player[];
+};
