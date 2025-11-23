@@ -9,20 +9,20 @@ import Link from "next/link";
 
 function MatchDetails() {
   const { id } = useParams(); // how does it know? - it probably matches the name
-    /* <Route path="/match/:id" element={<MatchDetails />} /> */
-  
+  /* <Route path="/match/:id" element={<MatchDetails />} /> */
+
 
 
   const [match, setMatch] = useState<Match | null>(null);
   const [result, setResult] = useState(null)
   const [activeTab, setActiveTab] = useState<"scorecard" | "commentary">(
-      "scorecard"
-    );
+    "scorecard"
+  );
 
   useEffect(() => {
     fetch(`http://localhost:8080/matches/${id}`)
       .then((res) => res.json())
-      .then((data) => {setMatch(data); console.log(data); setResult(data)})
+      .then((data) => { setMatch(data); console.log(data); setResult(data) })
       .catch((err) => console.error(err));
   }, [id]);
 
@@ -30,27 +30,25 @@ function MatchDetails() {
 
   return (
     <div className="mt-80 w-full">
-      <div className=" bg-zinc-900 w-[80%] mx-auto rounded-xl overflow-hidden">
+      <div className=" bg-zinc-900 max-w-7xl mx-auto rounded-xl overflow-hidden">
         <MatchSummary match={match} />
         {/* Tabs */}
         <div className="flex bg-zinc-900 w-full justify-start mx-auto ">
           <div
             onClick={() => setActiveTab("scorecard")}
-            className={`px-4 py-2   font-semibold transition cursor-pointer ${
-              activeTab === "scorecard"
-                ? "font-bold text-xl border-b-4 border-b-blue-500"
-                : " text-lg"
-            }`}
+            className={`px-4 py-2   font-semibold transition cursor-pointer ${activeTab === "scorecard"
+              ? "font-bold text-xl border-b-4 border-b-blue-500"
+              : " text-lg"
+              }`}
           >
             Scorecard
           </div>
           <div
             onClick={() => setActiveTab("commentary")}
-            className={`px-4 py-2 text-white font-semibold transition cursor-pointer${
-              activeTab === "commentary"
-                ? "font-bold text-xl border-b-4 border-b-blue-500"
-                : " text-lg"
-            }`}
+            className={`px-4 py-2 text-white font-semibold transition cursor-pointer${activeTab === "commentary"
+              ? "font-bold text-xl border-b-4 border-b-blue-500"
+              : " text-lg"
+              }`}
           >
             Commentary
           </div>
@@ -79,7 +77,7 @@ function MatchDetails() {
         )}
       </div>
 
-      <div className="mt-6 w-[80%] mx-auto bg-zinc-900 rounded text-xs max-h-60">
+      <div className="mt-6 w-full max-w-7xl mx-auto bg-zinc-900 rounded text-xs max-h-60">
         <div className="font-bold mb-2 text-green-400">Debug Response:</div>
         <pre>{JSON.stringify(result, null, 2)}</pre>
       </div>

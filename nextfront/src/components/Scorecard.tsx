@@ -52,15 +52,15 @@ export default function Scorecard({
     return <p className="text-white p-4">Loading...</p>;
 
   return (
-    <div className="w-[80%] mx-auto mt-5 bg-zinc-800 text-white rounded-xl overflow-hidden">
+    <div className="w-full max-w-7xl mx-auto mt-6 bg-zinc-950 text-white rounded-xl overflow-hidden border border-white/5 shadow-xl">
       {/* Batting Section */}
-      <div className="rounded-xl mb-5">
-        <div className="bg-blue-400/60 px-4 py-2 ">
-          <h2 className="text-md font-semibold">{battingTeamName} Innings</h2>
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 px-6 py-3">
+          <h2 className="text-lg font-bold text-white">{battingTeamName} Innings</h2>
         </div>
 
         {/* Batting Table Header */}
-        <div className="bg-zinc-700 px-4 py-2 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 text-xs font-medium">
+        <div className="bg-zinc-900/50 px-6 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-white/10">
           <div>Batting</div>
           <div className="text-right">R</div>
           <div className="text-right">B</div>
@@ -74,30 +74,28 @@ export default function Scorecard({
         {scoreboardData.map((batsman, index) => (
           <div
             key={batsman.batsman_id}
-            className={`px-4 py-2 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 items-center text-xs border-b border-gray-600 ${
-              index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-750"
-            }`}
+            className={`px-6 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 items-center text-sm border-b border-white/5 hover:bg-zinc-900/60 transition-colors ${index % 2 === 0 ? "bg-zinc-900/30" : "bg-zinc-900/50"
+              }`}
           >
             <div>
-              <div className="font-medium">{batsman.batsman_name}</div>
+              <div className="font-semibold text-zinc-200">{batsman.batsman_name}</div>
               {batsman.dismissal && (
-                <div className="text-gray-400 mt-1">{batsman.dismissal}</div>
+                <div className="text-zinc-500 text-xs mt-1">{batsman.dismissal}</div>
               )}
             </div>
-            <div className="text-right font-semibold">{batsman.runs}</div>
-            <div className="text-right">{batsman.balls}</div>
-            <div className="text-right">-</div>
-            <div className="text-right">{batsman.fours}</div>
-            <div className="text-right">{batsman.sixes}</div>
-            <div className="text-right">{batsman.strikeRate.toFixed(2)}</div>
+            <div className="text-right font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">{batsman.runs}</div>
+            <div className="text-right text-zinc-400">{batsman.balls}</div>
+            <div className="text-right text-zinc-500">-</div>
+            <div className="text-right text-zinc-400">{batsman.fours}</div>
+            <div className="text-right text-zinc-400">{batsman.sixes}</div>
+            <div className="text-right text-zinc-300">{batsman.strikeRate.toFixed(2)}</div>
           </div>
         ))}
       </div>
 
       {/* Bowling Section */}
-      <div className="rounded-xl">
-        {/* Bowling Table Header */}
-        <div className="bg-zinc-700 px-4 py-2 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 text-xs font-medium">
+      <div>
+        <div className="bg-zinc-900/50 px-6 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-white/10">
           <div className="text-left">Bowling</div>
           <div className="text-right">R</div>
           <div className="text-right">B</div>
@@ -111,21 +109,20 @@ export default function Scorecard({
         {bowlingData.map((bowler, index) => (
           <div
             key={bowler.bowlerId}
-            className={`px-4 py-2 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 items-center text-xs border-b border-gray-600 ${
-              index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-750"
-            }`}
+            className={`px-6 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-4 items-center text-sm border-b border-white/5 hover:bg-zinc-900/60 transition-colors ${index % 2 === 0 ? "bg-zinc-900/30" : "bg-zinc-900/50"
+              }`}
           >
             <div>
-              <div className="font-medium">{bowler.bowlerName}</div>
+              <div className="font-semibold text-zinc-200">{bowler.bowlerName}</div>
             </div>
-            <div className="text-right font-semibold">
+            <div className="text-right font-bold text-zinc-300">
               {bowler.runsConceded}
             </div>
-            <div className="text-right">{bowler.balls}</div>
-            <div className="text-right">{bowler.wickets}</div>
-            <div className="text-right">{bowler.fours}</div>
-            <div className="text-right">{bowler.sixes}</div>
-            <div className="text-right">{bowler.economyRate.toFixed(2)}</div>
+            <div className="text-right text-zinc-400">{bowler.balls}</div>
+            <div className="text-right font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">{bowler.wickets}</div>
+            <div className="text-right text-zinc-400">{bowler.fours}</div>
+            <div className="text-right text-zinc-400">{bowler.sixes}</div>
+            <div className="text-right text-zinc-300">{bowler.economyRate.toFixed(2)}</div>
           </div>
         ))}
       </div>

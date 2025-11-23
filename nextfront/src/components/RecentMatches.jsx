@@ -25,9 +25,9 @@ export default function RecentMatches() {
   };
 
   return (
-    <div className="bg-zinc-950 w-[99%] mx-auto text-white shadow-none overflow-hidden p-3 rounded-t-2xl rounded-b-none border border-white/5 border-b-white/5">
+    <div className="bg-zinc-950 max-w-7xl mx-auto text-white shadow-none overflow-hidden p-3 rounded-t-2xl rounded-b-none border border-white/5 border-b-white/5">
       <div className="flex items-center justify-between mb-2 border-b border-white/5 pb-1">
-        <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-purple-600">
+        <h2 className="text-lg font-bold text-white">
           Recent Matches
         </h2>
 

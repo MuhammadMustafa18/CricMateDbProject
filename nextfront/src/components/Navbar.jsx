@@ -14,10 +14,10 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="bg-zinc-950 w-[99%] mx-auto shadow-2xl p-2 flex justify-between items-center rounded-b-2xl rounded-t-none border border-white/5 border-t-0 relative z-50">
+    <div className="bg-zinc-950 w-full max-w-7xl mx-auto shadow-2xl p-2 flex justify-between items-center rounded-b-2xl rounded-t-none border border-white/5 border-t-0 relative z-50">
       {/* Logo / Brand */}
-      <Link href="/" className="text-2xl font-extrabold tracking-tight">
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-purple-600">
+      <Link href="/" className="text-2xl font-bold uppercase italic tracking-tight">
+        <span className="text-white">
           Cricmate
         </span>
       </Link>
@@ -31,8 +31,8 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${isActive
-                  ? "text-white bg-white/10 shadow-inner"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                ? "text-white bg-white/10 shadow-inner"
+                : "text-zinc-400 hover:text-white hover:bg-white/5"
                 }`}
             >
               {isActive && (

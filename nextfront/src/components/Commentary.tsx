@@ -47,36 +47,21 @@ const initialState: InningsState = {
   wicket: false,
   allBatsmen: [],
   allBowlers: []
-
 };
-
-// POST
-// {
-//   "innings": { "innings_id": 1 },
-//   "overNumber": 1,
-//   "ballNumber": 1,
-//   "batsman": {"player_id": 1}, // foriegn key
-//   "bowler":  {"player_id": 2},
-//   "runs": 4,
-//   "wicket": false
-// }
 
 export default function Commentary({ innings }: { innings: Innings[] }) {
   const [inningsState, setInningsState] = useState<{
     [id: number]: InningsState;
-  }>({}); // like a map
+  }>({});
   const [loading, setLoading] = useState(false);
-const [openC, setOpenC] = useState<{ [id: number]: boolean }>({});
-const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
+  const [openC, setOpenC] = useState<{ [id: number]: boolean }>({});
+  const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
 
   const [players, setPlayers] = useState<Player[]>([])
-  useEffect(()=>{
+  useEffect(() => {
 
   })
 
-
-
-  
   useEffect(() => {
     if (!innings || innings.length === 0) return;
 
@@ -87,7 +72,7 @@ const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
           const batRes = await fetch(
             `http://localhost:8080/teams/full/${inn.battingTeam.team_id}`
           );
-          const battingData = await batRes.json(); // {id, name, playerIds:[]}
+          const battingData = await batRes.json();
 
           // Fetch Bowlers (bowling team)
           const bowlRes = await fetch(
@@ -118,20 +103,20 @@ const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
 
     const t = s.allBowlers.find((p) => p.player_id === playerId);
 
-
     return t?.player_name || "Select Bowler...";
   };
+
   const getBatsmanLabel = (innId: number, playerId: number | null) => {
     if (!playerId) return "Select Batsman...";
 
     const s = inningsState[innId];
     if (!s) return "Select Batsman...";
 
-    // Only look in allBatsmen
     const t = s.allBatsmen.find((p) => p.player_id === playerId);
 
     return t?.player_name || "Select Batsman...";
   };
+
   async function handleSubmitBall(inningsId: number) {
     const state = inningsState[inningsId];
     if (!state || state.batsman === null || state.bowler === null) return;
@@ -156,7 +141,7 @@ const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
       const data = await res.json();
       console.log("Ball submitted:", data);
 
-      // Optionally, reset the inputs for next ball
+      // Reset the inputs for next ball
       setInningsState((prev) => ({
         ...prev,
         [inningsId]: {
@@ -175,11 +160,17 @@ const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
     }
   }
 
-
-  if (!innings || innings.length === 0) return <p>No innings data yet</p>;
+  if (!innings || innings.length === 0)
+    return (
+      <div className="w-full max-w-7xl mx-auto mt-6">
+        <div className="bg-zinc-900/50 rounded-2xl border border-white/5 p-8 text-center">
+          <p className="text-zinc-500">No innings data yet</p>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="w-[80%] mx-auto mt-6">
+    <div className="w-full max-w-7xl mx-auto mt-6 space-y-6">
       {innings.map((inn) => {
         const state = inningsState[inn.innings_id] || initialState;
 
@@ -193,260 +184,290 @@ const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
         return (
           <div
             key={inn.innings_id}
-            className="mt-6 border border-zinc-700 rounded-lg py-4 bg-zinc-900"
+            className="bg-zinc-900/50 rounded-2xl border border-white/5 overflow-hidden shadow-xl"
           >
-            <h2 className="text-lg font-bold mb-2 px-4 text-white">
-              {inn.battingTeam.team_name} Innings
-            </h2>
-
-            {/* Current ball input */}
-            <div className="flex flex-row gap-x-3 items-center text-white px-4">
-              <span className="text-xs">
-                {state.overNumber}.{state.ballNumber}
-              </span>
-
-              <div
-                className={`rounded font-bold text-sm flex items-center justify-center px-4 py-3
-                  ${
-                    state.wicket
-                      ? "bg-red-600"
-                      : state.runs === 4
-                      ? "bg-green-600"
-                      : state.runs === 6
-                      ? "bg-blue-600"
-                      : "bg-zinc-700"
-                  }`}
-              >
-                {state.wicket ? "W" : state.runs}
-              </div>
-              {/* Match Name */}
-
-              <div className="flex items-center gap-2 text-sm">
-                <Field>
-                  <FieldContent>
-                    <Popover
-                      open={openC[inn.innings_id] || false}
-                      onOpenChange={(v) =>
-                        setOpenC((prev) => ({ ...prev, [inn.innings_id]: v }))
-                      }
-                    >
-                      {" "}
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between bg-black"
-                        >
-                          {getBowlerLabel(inn.innings_id, state.bowler)}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0 bg-black text-white">
-                        <Command className="bg-black text-white">
-                          <CommandInput placeholder="Search bowler..." />
-                          <CommandList>
-                            <CommandEmpty>No Bowler found.</CommandEmpty>
-                            <CommandGroup>
-                              {(state.allBowlers ?? []).map((b) => (
-                                <CommandItem
-                                  className="text-white"
-                                  key={b.player_id}
-                                  onSelect={() => {
-                                    updateState({
-                                      bowler: Number(b.player_id),
-                                    });
-                                    setOpenC((prev) => ({
-                                      ...prev,
-                                      [inn.innings_id]: false,
-                                    }));
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      state.bowler === b.player_id
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {b.player_name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </FieldContent>
-                </Field>
-                <span>to</span>
-                <Field>
-                  <FieldContent>
-                    <Popover
-                      open={openB[inn.innings_id] || false}
-                      onOpenChange={(v) =>
-                        setOpenB((prev) => ({ ...prev, [inn.innings_id]: v }))
-                      }
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between bg-black"
-                        >
-                          {getBatsmanLabel(inn.innings_id, state.batsman)}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-full p-0 bg-black text-white">
-                        <Command className="bg-black text-white">
-                          <CommandInput placeholder="Search batsman..." />
-                          <CommandList>
-                            <CommandEmpty>No Batsman found.</CommandEmpty>
-                            <CommandGroup>
-                              {(state.allBatsmen ?? []).map((b) => (
-                                <CommandItem
-                                  className="text-white"
-                                  key={b.player_id}
-                                  onSelect={() => {
-                                    updateState({
-                                      batsman: Number(b.player_id),
-                                    });
-                                    setOpenB((prev) => ({
-                                      ...prev,
-                                      [inn.innings_id]: false,
-                                    }));
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      state.batsman === b.player_id
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  {b.player_name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </FieldContent>
-                </Field>
-              </div>
-
-              <span>Runs:</span>
-              <Input
-                type="number"
-                value={state.runs}
-                onChange={(e) => updateState({ runs: Number(e.target.value) })}
-                className="w-16 h-7 text-xs px-2 no-spinner"
-                placeholder="Runs"
-              />
-
-              <label className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={state.wicket}
-                  onChange={(e) => updateState({ wicket: e.target.checked })}
-                />
-                <span className="text-xs">W</span>
-              </label>
-
-              <span>Over:</span>
-              <Input
-                type="number"
-                value={state.overNumber}
-                onChange={(e) =>
-                  updateState({ overNumber: Number(e.target.value) })
-                }
-                className="w-7 h-7 text-xs px-2 no-spinner"
-              />
-              <span>Ball:</span>
-              <Input
-                type="number"
-                value={state.ballNumber}
-                onChange={(e) =>
-                  updateState({ ballNumber: Number(e.target.value) })
-                }
-                className="w-7 h-7 text-xs px-2 no-spinner"
-              />
-              <Button
-                className=""
-                onClick={() => handleSubmitBall(inn.innings_id)}
-                variant="destructive"
-              >
-                Submit
-              </Button>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 px-6 py-4">
+              <h2 className="text-xl font-bold text-white">
+                {inn.battingTeam.team_name} Innings
+              </h2>
             </div>
 
-            {/* Balls list */}
-            {inn.balls && inn.balls.length > 0 ? (
-              Object.entries(
-                inn.balls.reduce((acc: any, ball) => {
-                  const over = ball.overNumber;
-                  if (!acc[over]) acc[over] = [];
-                  acc[over].push(ball);
-                  return acc;
-                }, {})
-              )
-                .sort((a, b) => Number(b[0]) - Number(a[0]))
-                .map(([over, balls]: any) => (
-                  <div key={over} className="my-3 px-4">
-                    {balls.length >= 6 && (
-                      <div className="bg-blue-400/60 flex flex-row my-5 px-6 py-2 gap-2 items-baseline">
-                        <div className="font-bold text-lg uppercase">
-                          End of over {over}
-                        </div>
-                        <div className="text-sm">
-                          {balls.reduce(
-                            (sum: number, ball: Ball) => sum + ball.runs,
-                            0
-                          )}{" "}
-                          runs
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-y-3">
-                      {balls
-                        .sort(
-                          (a: Ball, b: Ball) =>
-                            Number(b.ballNumber) - Number(a.ballNumber)
-                        )
-                        .map((ball: Ball) => (
-                          <div
-                            key={ball.ball_id}
-                            className="flex flex-row gap-x-3 items-center"
+            {/* Ball Input Section */}
+            <div className="p-6 bg-zinc-950/50 border-b border-white/5">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-zinc-500">Current Ball:</span>
+                    <span className="text-sm font-bold text-white bg-zinc-900 px-3 py-1 rounded border border-white/10">
+                      {state.overNumber}.{state.ballNumber}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`rounded-lg font-bold text-lg flex items-center justify-center px-6 py-2 min-w-[60px] ${state.wicket
+                        ? "bg-red-500/20 border-2 border-red-500 text-red-500"
+                        : state.runs === 4
+                          ? "bg-green-500/20 border-2 border-green-500 text-green-500"
+                          : state.runs === 6
+                            ? "bg-blue-500/20 border-2 border-blue-500 text-blue-500"
+                            : "bg-zinc-800 border-2 border-white/10 text-white"
+                      }`}
+                  >
+                    {state.wicket ? "W" : state.runs}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel className="text-zinc-300 text-sm">Bowler</FieldLabel>
+                    <FieldContent>
+                      <Popover
+                        open={openC[inn.innings_id] || false}
+                        onOpenChange={(v) =>
+                          setOpenC((prev) => ({ ...prev, [inn.innings_id]: v }))
+                        }
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
                           >
-                            <div className="text-xs">{`${over}.${ball.ballNumber}`}</div>
-                            <div
-                              className={`px-4 py-3 rounded text-sm font-bold ${
-                                ball.wicket
-                                  ? "bg-red-600"
-                                  : ball.runs === 4
-                                  ? "bg-green-600"
-                                  : ball.runs === 6
-                                  ? "bg-blue-600"
-                                  : "bg-zinc-700"
-                              }`}
-                            >
-                              {ball.wicket ? "W" : ball.runs}
-                            </div>
-                            <div className="text-sm">
-                              {`${ball.bowler.player_name} to ${ball.batsman.player_name}`}
+                            {getBowlerLabel(inn.innings_id, state.bowler)}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                          <Command className="bg-zinc-950 text-white">
+                            <CommandInput placeholder="Search bowler..." className="text-white" />
+                            <CommandList>
+                              <CommandEmpty>No Bowler found.</CommandEmpty>
+                              <CommandGroup>
+                                {(state.allBowlers ?? []).map((b) => (
+                                  <CommandItem
+                                    className="text-white hover:bg-zinc-900"
+                                    key={b.player_id}
+                                    onSelect={() => {
+                                      updateState({
+                                        bowler: Number(b.player_id),
+                                      });
+                                      setOpenC((prev) => ({
+                                        ...prev,
+                                        [inn.innings_id]: false,
+                                      }));
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        state.bowler === b.player_id
+                                          ? "opacity-100 text-orange-500"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {b.player_name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FieldContent>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-zinc-300 text-sm">Batsman</FieldLabel>
+                    <FieldContent>
+                      <Popover
+                        open={openB[inn.innings_id] || false}
+                        onOpenChange={(v) =>
+                          setOpenB((prev) => ({ ...prev, [inn.innings_id]: v }))
+                        }
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
+                          >
+                            {getBatsmanLabel(inn.innings_id, state.batsman)}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                          <Command className="bg-zinc-950 text-white">
+                            <CommandInput placeholder="Search batsman..." className="text-white" />
+                            <CommandList>
+                              <CommandEmpty>No Batsman found.</CommandEmpty>
+                              <CommandGroup>
+                                {(state.allBatsmen ?? []).map((b) => (
+                                  <CommandItem
+                                    className="text-white hover:bg-zinc-900"
+                                    key={b.player_id}
+                                    onSelect={() => {
+                                      updateState({
+                                        batsman: Number(b.player_id),
+                                      });
+                                      setOpenB((prev) => ({
+                                        ...prev,
+                                        [inn.innings_id]: false,
+                                      }));
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        state.batsman === b.player_id
+                                          ? "opacity-100 text-orange-500"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {b.player_name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FieldContent>
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+                  <Field>
+                    <FieldLabel className="text-zinc-300 text-sm">Runs</FieldLabel>
+                    <Input
+                      type="number"
+                      value={state.runs}
+                      onChange={(e) => updateState({ runs: Number(e.target.value) })}
+                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                      placeholder="0"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-zinc-300 text-sm">Over</FieldLabel>
+                    <Input
+                      type="number"
+                      value={state.overNumber}
+                      onChange={(e) =>
+                        updateState({ overNumber: Number(e.target.value) })
+                      }
+                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-zinc-300 text-sm">Ball</FieldLabel>
+                    <Input
+                      type="number"
+                      value={state.ballNumber}
+                      onChange={(e) =>
+                        updateState({ ballNumber: Number(e.target.value) })
+                      }
+                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                    />
+                  </Field>
+
+                  <label className="flex items-center gap-2 p-3 bg-zinc-950 rounded-lg border border-white/10 cursor-pointer hover:border-red-500/50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={state.wicket}
+                      onChange={(e) => updateState({ wicket: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium text-zinc-300">Wicket</span>
+                  </label>
+
+                  <Button
+                    onClick={() => handleSubmitBall(inn.innings_id)}
+                    disabled={loading || !state.batsman || !state.bowler}
+                    className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 hover:opacity-90 text-white font-bold disabled:opacity-50"
+                  >
+                    {loading ? "Submitting..." : "Submit Ball"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Balls History */}
+            <div className="p-6">
+              {inn.balls && inn.balls.length > 0 ? (
+                <div className="space-y-6">
+                  {Object.entries(
+                    inn.balls.reduce((acc: any, ball) => {
+                      const over = ball.overNumber;
+                      if (!acc[over]) acc[over] = [];
+                      acc[over].push(ball);
+                      return acc;
+                    }, {})
+                  )
+                    .sort((a, b) => Number(b[0]) - Number(a[0]))
+                    .map(([over, balls]: any) => (
+                      <div key={over}>
+                        {balls.length >= 6 && (
+                          <div className="bg-gradient-to-r from-orange-500/10 via-red-500/10 to-purple-600/10 border border-orange-500/20 rounded-lg px-6 py-3 mb-4">
+                            <div className="flex items-center justify-between">
+                              <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-400">
+                                END OF OVER {over}
+                              </div>
+                              <div className="text-sm text-zinc-400">
+                                {balls.reduce(
+                                  (sum: number, ball: Ball) => sum + ball.runs,
+                                  0
+                                )}{" "}
+                                runs
+                              </div>
                             </div>
                           </div>
-                        ))}
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <p className="text-gray-400 italic px-4">
-                No balls recorded yet.
-              </p>
-            )}
+                        )}
+                        <div className="space-y-3">
+                          {balls
+                            .sort(
+                              (a: Ball, b: Ball) =>
+                                Number(b.ballNumber) - Number(a.ballNumber)
+                            )
+                            .map((ball: Ball) => (
+                              <div
+                                key={ball.ball_id}
+                                className="flex items-center gap-4 p-4 bg-zinc-900/30 rounded-lg border border-white/5 hover:bg-zinc-900/50 transition-colors"
+                              >
+                                <div className="text-xs font-mono text-zinc-500 min-w-[40px]">
+                                  {`${over}.${ball.ballNumber}`}
+                                </div>
+                                <div
+                                  className={`px-4 py-2 rounded-lg text-sm font-bold min-w-[50px] text-center ${ball.wicket
+                                      ? "bg-red-500/20 border border-red-500/50 text-red-500"
+                                      : ball.runs === 4
+                                        ? "bg-green-500/20 border border-green-500/50 text-green-500"
+                                        : ball.runs === 6
+                                          ? "bg-blue-500/20 border border-blue-500/50 text-blue-500"
+                                          : "bg-zinc-800 border border-white/10 text-white"
+                                    }`}
+                                >
+                                  {ball.wicket ? "W" : ball.runs}
+                                </div>
+                                <div className="text-sm text-zinc-300 flex-1">
+                                  <span className="font-medium text-white">{ball.bowler.player_name}</span>
+                                  <span className="text-zinc-500 mx-2">to</span>
+                                  <span className="font-medium text-white">{ball.batsman.player_name}</span>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-zinc-500 italic">
+                    No balls recorded yet. Add the first ball above.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}
