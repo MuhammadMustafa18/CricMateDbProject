@@ -1,5 +1,6 @@
 package com.cricmate.backend.controller;
 
+import com.cricmate.backend.dto.BallUpdateDTO;
 import com.cricmate.backend.model.Ball;
 // import com.cricmate.backend.repository.PlayerRepository;
 import com.cricmate.backend.services.BallService;
@@ -25,6 +26,11 @@ public class BallController {
     @GetMapping
     public List<Ball> getAllBalls() {
         return ballService.getAllBalls();
+    }
+ 
+    @PatchMapping("/{id}")
+    public Ball patchBall(@PathVariable int id, @RequestBody BallUpdateDTO ball){
+        return ballService.updateBall(id, ball);
     }
 }
 // TODO: FILHAL NO CHECKS ON PLAYERS ACTUALLY BELONGING TO THAT SPECIFIC TEAM OR NOT
