@@ -30,14 +30,14 @@ function MatchDetails() {
 
   return (
     <div className="mt-80 w-full">
-      <div className=" bg-zinc-900 max-w-7xl mx-auto rounded-xl overflow-hidden">
+      <div className=" bg-zinc-950 max-w-7xl mx-auto rounded-xl overflow-hidden">
         <MatchSummary match={match} />
         {/* Tabs */}
-        <div className="flex bg-zinc-900 w-full justify-start mx-auto ">
+        <div className="flex bg-zinc-950 w-full justify-start mx-auto ">
           <div
             onClick={() => setActiveTab("scorecard")}
             className={`px-4 py-2   font-semibold transition cursor-pointer ${activeTab === "scorecard"
-              ? "font-bold text-xl border-b-4 border-b-blue-500"
+              ? "font-bold text-xl border-b-4 border-b-orange-500"
               : " text-lg"
               }`}
           >
@@ -46,7 +46,7 @@ function MatchDetails() {
           <div
             onClick={() => setActiveTab("commentary")}
             className={`px-4 py-2 text-white font-semibold transition cursor-pointer${activeTab === "commentary"
-              ? "font-bold text-xl border-b-4 border-b-blue-500"
+              ? "font-bold text-xl border-b-4 border-b-orange-500"
               : " text-lg"
               }`}
           >

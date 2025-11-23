@@ -11,7 +11,7 @@ import {
   FieldSet,
   FieldLegend,
 } from "@/components/ui/field";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -26,6 +26,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type InningsState = {
   overNumber: number;
@@ -56,6 +64,22 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
   const [loading, setLoading] = useState(false);
   const [openC, setOpenC] = useState<{ [id: number]: boolean }>({});
   const [openB, setOpenB] = useState<{ [id: number]: boolean }>({});
+
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingBall, setEditingBall] = useState<Ball | null>(null);
+  const [editInningsId, setEditInningsId] = useState<number | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    overNumber: 1,
+    ballNumber: 1,
+    runs: 0,
+    isWicket: false,
+    batsmanId: null as number | null,
+    bowlerId: null as number | null,
+  });
+  const [editOpenBatsman, setEditOpenBatsman] = useState(false);
+  const [editOpenBowler, setEditOpenBowler] = useState(false);
 
   const [players, setPlayers] = useState<Player[]>([])
   useEffect(() => {
@@ -115,6 +139,60 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
     const t = s.allBatsmen.find((p) => p.player_id === playerId);
 
     return t?.player_name || "Select Batsman...";
+  };
+
+  // Edit dialog handlers
+  const handleEditBall = (ball: Ball, inningsId: number) => {
+    setEditingBall(ball);
+    setEditInningsId(inningsId);
+    setEditFormData({
+      overNumber: ball.overNumber,
+      ballNumber: ball.ballNumber,
+      runs: ball.runs,
+      isWicket: ball.wicket,
+      batsmanId: ball.batsman.player_id,
+      bowlerId: ball.bowler.player_id,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateBall = async () => {
+    if (!editingBall) return;
+
+    setEditLoading(true);
+    try {
+      const res = await fetch(`http://localhost:8080/balls/${editingBall.ball_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (res.ok) {
+        console.log("Ball updated successfully");
+        setEditDialogOpen(false);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("Error updating ball:", err);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const getEditBatsmanLabel = (playerId: number | null) => {
+    if (!playerId || !editInningsId) return "Select Batsman...";
+    const state = inningsState[editInningsId];
+    if (!state) return "Select Batsman...";
+    const player = state.allBatsmen.find((p) => p.player_id === playerId);
+    return player?.player_name || "Select Batsman...";
+  };
+
+  const getEditBowlerLabel = (playerId: number | null) => {
+    if (!playerId || !editInningsId) return "Select Bowler...";
+    const state = inningsState[editInningsId];
+    if (!state) return "Select Bowler...";
+    const player = state.allBowlers.find((p) => p.player_id === playerId);
+    return player?.player_name || "Select Bowler...";
   };
 
   async function handleSubmitBall(inningsId: number) {
@@ -206,12 +284,12 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
 
                   <div
                     className={`rounded-lg font-bold text-lg flex items-center justify-center px-6 py-2 min-w-[60px] ${state.wicket
-                        ? "bg-red-500/20 border-2 border-red-500 text-red-500"
-                        : state.runs === 4
-                          ? "bg-green-500/20 border-2 border-green-500 text-green-500"
-                          : state.runs === 6
-                            ? "bg-blue-500/20 border-2 border-blue-500 text-blue-500"
-                            : "bg-zinc-800 border-2 border-white/10 text-white"
+                      ? "bg-red-500/20 border-2 border-red-500 text-red-500"
+                      : state.runs === 4
+                        ? "bg-green-500/20 border-2 border-green-500 text-green-500"
+                        : state.runs === 6
+                          ? "bg-blue-500/20 border-2 border-blue-500 text-blue-500"
+                          : "bg-zinc-800 border-2 border-white/10 text-white"
                       }`}
                   >
                     {state.wicket ? "W" : state.runs}
@@ -439,12 +517,12 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
                                 </div>
                                 <div
                                   className={`px-4 py-2 rounded-lg text-sm font-bold min-w-[50px] text-center ${ball.wicket
-                                      ? "bg-red-500/20 border border-red-500/50 text-red-500"
-                                      : ball.runs === 4
-                                        ? "bg-green-500/20 border border-green-500/50 text-green-500"
-                                        : ball.runs === 6
-                                          ? "bg-blue-500/20 border border-blue-500/50 text-blue-500"
-                                          : "bg-zinc-800 border border-white/10 text-white"
+                                    ? "bg-red-500/20 border border-red-500/50 text-red-500"
+                                    : ball.runs === 4
+                                      ? "bg-green-500/20 border border-green-500/50 text-green-500"
+                                      : ball.runs === 6
+                                        ? "bg-blue-500/20 border border-blue-500/50 text-blue-500"
+                                        : "bg-zinc-800 border border-white/10 text-white"
                                     }`}
                                 >
                                   {ball.wicket ? "W" : ball.runs}
@@ -454,6 +532,14 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
                                   <span className="text-zinc-500 mx-2">to</span>
                                   <span className="font-medium text-white">{ball.batsman.player_name}</span>
                                 </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditBall(ball, inn.innings_id)}
+                                  className="bg-zinc-900 border-white/10 text-white hover:bg-zinc-800 hover:border-orange-500/50"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
                               </div>
                             ))}
                         </div>
@@ -471,6 +557,175 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
           </div>
         );
       })}
+
+      {/* Edit Ball Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="bg-zinc-950 border-white/10 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-400">
+              Edit Ball Delivery
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Update the details of this delivery
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingBall && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel className="text-zinc-300 text-sm">Over Number</FieldLabel>
+                  <Input
+                    type="number"
+                    value={editFormData.overNumber}
+                    onChange={(e) => setEditFormData({ ...editFormData, overNumber: Number(e.target.value) })}
+                    className="bg-zinc-900 border-white/10 text-white focus:border-orange-500/50"
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel className="text-zinc-300 text-sm">Ball Number</FieldLabel>
+                  <Input
+                    type="number"
+                    value={editFormData.ballNumber}
+                    onChange={(e) => setEditFormData({ ...editFormData, ballNumber: Number(e.target.value) })}
+                    className="bg-zinc-900 border-white/10 text-white focus:border-orange-500/50"
+                  />
+                </Field>
+              </div>
+
+              <Field>
+                <FieldLabel className="text-zinc-300 text-sm">Batsman</FieldLabel>
+                <Popover open={editOpenBatsman} onOpenChange={setEditOpenBatsman}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-zinc-900 border-white/10 text-white hover:bg-zinc-800 hover:border-orange-500/50"
+                    >
+                      {getEditBatsmanLabel(editFormData.batsmanId)}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                    <Command className="bg-zinc-950 text-white">
+                      <CommandInput placeholder="Search batsman..." className="text-white" />
+                      <CommandList>
+                        <CommandEmpty>No Batsman found.</CommandEmpty>
+                        <CommandGroup>
+                          {editInningsId && (inningsState[editInningsId]?.allBatsmen ?? []).map((b) => (
+                            <CommandItem
+                              className="text-white hover:bg-zinc-900"
+                              key={b.player_id}
+                              onSelect={() => {
+                                setEditFormData({ ...editFormData, batsmanId: b.player_id });
+                                setEditOpenBatsman(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  editFormData.batsmanId === b.player_id
+                                    ? "opacity-100 text-orange-500"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {b.player_name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </Field>
+
+              <Field>
+                <FieldLabel className="text-zinc-300 text-sm">Bowler</FieldLabel>
+                <Popover open={editOpenBowler} onOpenChange={setEditOpenBowler}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-zinc-900 border-white/10 text-white hover:bg-zinc-800 hover:border-orange-500/50"
+                    >
+                      {getEditBowlerLabel(editFormData.bowlerId)}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                    <Command className="bg-zinc-950 text-white">
+                      <CommandInput placeholder="Search bowler..." className="text-white" />
+                      <CommandList>
+                        <CommandEmpty>No Bowler found.</CommandEmpty>
+                        <CommandGroup>
+                          {editInningsId && (inningsState[editInningsId]?.allBowlers ?? []).map((b) => (
+                            <CommandItem
+                              className="text-white hover:bg-zinc-900"
+                              key={b.player_id}
+                              onSelect={() => {
+                                setEditFormData({ ...editFormData, bowlerId: b.player_id });
+                                setEditOpenBowler(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  editFormData.bowlerId === b.player_id
+                                    ? "opacity-100 text-orange-500"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {b.player_name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel className="text-zinc-300 text-sm">Runs</FieldLabel>
+                  <Input
+                    type="number"
+                    value={editFormData.runs}
+                    onChange={(e) => setEditFormData({ ...editFormData, runs: Number(e.target.value) })}
+                    className="bg-zinc-900 border-white/10 text-white focus:border-orange-500/50"
+                  />
+                </Field>
+
+                <label className="flex items-center gap-2 p-3 bg-zinc-900 rounded-lg border border-white/10 cursor-pointer hover:border-red-500/50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.isWicket}
+                    onChange={(e) => setEditFormData({ ...editFormData, isWicket: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-zinc-300">Wicket</span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="bg-zinc-900 border-white/10 text-white hover:bg-zinc-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateBall}
+              disabled={editLoading}
+              className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 hover:opacity-90 text-white font-bold"
+            >
+              {editLoading ? "Updating..." : "Update Ball"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

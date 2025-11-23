@@ -63,7 +63,7 @@ public interface BallRepository extends JpaRepository<Ball, Integer> {
             "WHERE b.innings.innings_id = :inningsId " +
             "GROUP BY b.bowler.player_id, b.bowler.player_name")
     List<BowlingStatsDTO> getBowlerStats(@Param("inningsId") int inningsId);
-
+ 
     @Query("SELECT new com.cricmate.backend.dto.CareerBowlingStatsDTO( " +
                     "b.bowler.player_id, " +
                     "b.bowler.player_name, " +
