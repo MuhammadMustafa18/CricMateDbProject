@@ -14,26 +14,34 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="bg-neutral-800 w-[99%] mx-auto shadow-md p-5 flex justify-between items-center">
+    <div className="bg-zinc-950 w-[99%] mx-auto shadow-2xl p-2 flex justify-between items-center rounded-b-2xl rounded-t-none border border-white/5 border-t-0 relative z-50">
       {/* Logo / Brand */}
-      <Link href="/" className="text-3xl font-bold text-white">
-        Cricmate
+      <Link href="/" className="text-2xl font-extrabold tracking-tight">
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-purple-600">
+          Cricmate
+        </span>
       </Link>
 
       {/* Navigation Links */}
-      <div className="flex space-x-6">
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`text-xl font-bold ${pathname === link.href
-                ? "text-white"
-                : "text-gray-300 hover:text-white"
-              }`}
-          >
-            {link.label}
-          </Link>
-        ))}
+      <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl border border-white/5">
+        {links.map((link) => {
+          const isActive = pathname === link.href;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${isActive
+                  ? "text-white bg-white/10 shadow-inner"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
+            >
+              {isActive && (
+                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-orange-500/10 via-red-500/10 to-purple-600/10 border border-white/5 pointer-events-none" />
+              )}
+              {link.label}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
