@@ -25,6 +25,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Match, Innings } from "../../../types";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 export default function addBallByBall() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -36,6 +39,36 @@ export default function addBallByBall() {
   const [loading, setLoading] = useState(true);
   const [openC, setOpenC] = useState(false);
   const [openInnings, setOpenInnings] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router) return;
+
+    async function checkLogin() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        toast.error("You must log in first.");
+        router.push("/admin/auth");
+        return;
+      }
+
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error || !profiles?.is_admin) {
+        toast.error("You do not have admin access.");
+        router.push("/");
+        return;
+      }
+      setCheckingAuth(false);
+    }
+    checkLogin();
+  }, [router]);
 
   useEffect(() => {
     async function fetchMatches() {
@@ -79,6 +112,8 @@ export default function addBallByBall() {
     if (!selectedInning) return "Select Inning";
     return `Inning ${selectedInning.innings_id}`;
   }
+
+  if (checkingAuth) return <div className="min-h-screen flex items-center justify-center text-white">Checking access...</div>;
 
   return (
     <div className="mt-70 max-w-lg mx-auto bg-black p-6 rounded-md text-white">

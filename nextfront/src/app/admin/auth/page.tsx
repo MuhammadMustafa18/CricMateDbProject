@@ -29,6 +29,8 @@ export default function AdminAuthPage() {
             }
         });
 
+        console.log(data, error);
+
         if (error) {
             setError(error.message);
             setLoading(false);
@@ -40,6 +42,8 @@ export default function AdminAuthPage() {
             console.error("Login failed: no user returned");
             return;
         }
+
+        console.log(user);
 
         // Insert profile row manually
         await supabase.from("profiles").insert({
@@ -183,6 +187,8 @@ export default function AdminAuthPage() {
 
                             <button
                                 type="submit"
+                                onClick={isLogin ? handleLogin : handleSignup}
+
                                 className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-all duration-200 mt-2"
                             >
                                 {isLogin ? "Sign In" : "Create Account"}

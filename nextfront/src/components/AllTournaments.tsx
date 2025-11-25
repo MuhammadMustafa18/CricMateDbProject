@@ -56,7 +56,7 @@ export default function AllTournaments() {
 
   return (
     <div className="min-h-screen w-full bg-zinc-950 pb-12">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="mb-8">
           <nav className="text-sm text-zinc-400 mb-4">

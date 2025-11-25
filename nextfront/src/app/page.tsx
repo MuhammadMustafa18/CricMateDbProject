@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 interface Match {
   match_id: number;
@@ -28,14 +29,24 @@ export default function Home() {
       })
       .catch((err) => console.error(err));
   }, []);
+  // const router = useRouter();
+  // const [message, setMessage] = useState("");
+
+  // useEffect(() => {
+  //   if (router.query.error === "not_logged_in") setMessage("You must log in first.");
+  //   if (router.query.error === "not_admin") setMessage("You do not have admin access.");
+  // }, [router.query]);
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-70">
+
       {/* Hero Section */}
       <div className="w-full max-w-7xl mx-auto px-6 mb-12">
         <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 rounded-2xl p-12 overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
           <div className="relative z-10">
+            {/* {message && <div className="text-red-500 font-medium">{message}</div>} */}
+
             <h1 className="text-5xl font-black text-white mb-4">
               Welcome to CricMate
             </h1>

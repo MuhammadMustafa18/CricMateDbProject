@@ -27,6 +27,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
+
 
 interface Team {
   team_id: number;
@@ -47,6 +51,46 @@ export default function AddPlayerPage() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
   const [open, setOpen] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router) return; // wait for router
+
+    async function checkLogin() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        toast.error("You must log in first.");
+        router.push("/admin/auth");
+        // user is not logged in → redirect to lo gin
+        // window.location.href = "/admin/auth";
+        return;
+      }
+
+      // Fetch the profile to check if user is admin
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error || !profiles?.is_admin) {
+        // Not an admin → redirect or show error
+        toast.error("You do not have admin access.");
+        // setTimeout(() => router.push("/"), 2000);
+        router.push("/");
+
+        // window.location.href = "/";
+        return;
+      }
+      setCheckingAuth(false);
+
+    }
+    checkLogin()
+  }, [router]);
+
+
 
   // Fetch all teams
   useEffect(() => {
@@ -131,6 +175,7 @@ export default function AddPlayerPage() {
       setLoading(false);
     }
   };
+  if (checkingAuth) return <div className="min-h-screen flex items-center justify-center text-white">Checking access...</div>;
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-32 pb-12">

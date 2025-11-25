@@ -27,6 +27,9 @@ import {
 } from "@/components/ui/popover";
 import Link from "next/link";
 import { Team, Match } from "../../../types";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 export default function AddInnings() {
   const [matchId, setMatchId] = useState<number | null>(null);
@@ -39,10 +42,41 @@ export default function AddInnings() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const router = useRouter();
 
   const [openA, setOpenA] = useState(false);
   const [openB, setOpenB] = useState(false);
   const [openC, setOpenC] = useState(false);
+
+  // Check authentication
+  useEffect(() => {
+    if (!router) return;
+
+    async function checkLogin() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        toast.error("You must log in first.");
+        router.push("/admin/auth");
+        return;
+      }
+
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error || !profiles?.is_admin) {
+        toast.error("You do not have admin access.");
+        router.push("/");
+        return;
+      }
+      setCheckingAuth(false);
+    }
+    checkLogin();
+  }, [router]);
 
   // Fetch teams
   useEffect(() => {
@@ -141,6 +175,8 @@ export default function AddInnings() {
     if (!match) return "Select Match...";
     return `Match #${match.match_id}: ${match.teamA?.team_name || "Team A"} vs ${match.teamB?.team_name || "Team B"}`;
   };
+
+  if (checkingAuth) return <div className="min-h-screen flex items-center justify-center text-white">Checking access...</div>;
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-32 pb-12">
@@ -374,8 +410,8 @@ export default function AddInnings() {
               {message && (
                 <div
                   className={`mt-6 p-4 rounded-lg border ${messageType === "success"
-                      ? "bg-green-500/10 border-green-500/20 text-green-500"
-                      : "bg-red-500/10 border-red-500/20 text-red-500"
+                    ? "bg-green-500/10 border-green-500/20 text-green-500"
+                    : "bg-red-500/10 border-red-500/20 text-red-500"
                     }`}
                 >
                   <p className="text-sm font-medium">{message}</p>

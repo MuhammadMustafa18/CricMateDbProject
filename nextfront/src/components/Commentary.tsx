@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 type InningsState = {
   overNumber: number;
@@ -58,6 +59,7 @@ const initialState: InningsState = {
 };
 
 export default function Commentary({ innings }: { innings: Innings[] }) {
+  const { isAdmin } = useIsAdmin();
   const [inningsState, setInningsState] = useState<{
     [id: number]: InningsState;
   }>({});
@@ -271,204 +273,206 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
               </h2>
             </div>
 
-            {/* Ball Input Section */}
-            <div className="p-6 bg-zinc-950/50 border-b border-white/5">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-zinc-500">Current Ball:</span>
-                    <span className="text-sm font-bold text-white bg-zinc-900 px-3 py-1 rounded border border-white/10">
-                      {state.overNumber}.{state.ballNumber}
-                    </span>
+            {/* Ball Input Section - Admin Only */}
+            {isAdmin && (
+              <div className="p-6 bg-zinc-950/50 border-b border-white/5">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-zinc-500">Current Ball:</span>
+                      <span className="text-sm font-bold text-white bg-zinc-900 px-3 py-1 rounded border border-white/10">
+                        {state.overNumber}.{state.ballNumber}
+                      </span>
+                    </div>
+
+                    <div
+                      className={`rounded-lg font-bold text-lg flex items-center justify-center px-6 py-2 min-w-[60px] ${state.wicket
+                        ? "bg-red-500/20 border-2 border-red-500 text-red-500"
+                        : state.runs === 4
+                          ? "bg-green-500/20 border-2 border-green-500 text-green-500"
+                          : state.runs === 6
+                            ? "bg-blue-500/20 border-2 border-blue-500 text-blue-500"
+                            : "bg-zinc-800 border-2 border-white/10 text-white"
+                        }`}
+                    >
+                      {state.wicket ? "W" : state.runs}
+                    </div>
                   </div>
 
-                  <div
-                    className={`rounded-lg font-bold text-lg flex items-center justify-center px-6 py-2 min-w-[60px] ${state.wicket
-                      ? "bg-red-500/20 border-2 border-red-500 text-red-500"
-                      : state.runs === 4
-                        ? "bg-green-500/20 border-2 border-green-500 text-green-500"
-                        : state.runs === 6
-                          ? "bg-blue-500/20 border-2 border-blue-500 text-blue-500"
-                          : "bg-zinc-800 border-2 border-white/10 text-white"
-                      }`}
-                  >
-                    {state.wicket ? "W" : state.runs}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel className="text-zinc-300 text-sm">Bowler</FieldLabel>
+                      <FieldContent>
+                        <Popover
+                          open={openC[inn.innings_id] || false}
+                          onOpenChange={(v) =>
+                            setOpenC((prev) => ({ ...prev, [inn.innings_id]: v }))
+                          }
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
+                            >
+                              {getBowlerLabel(inn.innings_id, state.bowler)}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                            <Command className="bg-zinc-950 text-white">
+                              <CommandInput placeholder="Search bowler..." className="text-white" />
+                              <CommandList>
+                                <CommandEmpty>No Bowler found.</CommandEmpty>
+                                <CommandGroup>
+                                  {(state.allBowlers ?? []).map((b) => (
+                                    <CommandItem
+                                      className="text-white hover:bg-zinc-900"
+                                      key={b.player_id}
+                                      onSelect={() => {
+                                        updateState({
+                                          bowler: Number(b.player_id),
+                                        });
+                                        setOpenC((prev) => ({
+                                          ...prev,
+                                          [inn.innings_id]: false,
+                                        }));
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          state.bowler === b.player_id
+                                            ? "opacity-100 text-orange-500"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {b.player_name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </FieldContent>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel className="text-zinc-300 text-sm">Batsman</FieldLabel>
+                      <FieldContent>
+                        <Popover
+                          open={openB[inn.innings_id] || false}
+                          onOpenChange={(v) =>
+                            setOpenB((prev) => ({ ...prev, [inn.innings_id]: v }))
+                          }
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
+                            >
+                              {getBatsmanLabel(inn.innings_id, state.batsman)}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+
+                          <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
+                            <Command className="bg-zinc-950 text-white">
+                              <CommandInput placeholder="Search batsman..." className="text-white" />
+                              <CommandList>
+                                <CommandEmpty>No Batsman found.</CommandEmpty>
+                                <CommandGroup>
+                                  {(state.allBatsmen ?? []).map((b) => (
+                                    <CommandItem
+                                      className="text-white hover:bg-zinc-900"
+                                      key={b.player_id}
+                                      onSelect={() => {
+                                        updateState({
+                                          batsman: Number(b.player_id),
+                                        });
+                                        setOpenB((prev) => ({
+                                          ...prev,
+                                          [inn.innings_id]: false,
+                                        }));
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          state.batsman === b.player_id
+                                            ? "opacity-100 text-orange-500"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {b.player_name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </FieldContent>
+                    </Field>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel className="text-zinc-300 text-sm">Bowler</FieldLabel>
-                    <FieldContent>
-                      <Popover
-                        open={openC[inn.innings_id] || false}
-                        onOpenChange={(v) =>
-                          setOpenC((prev) => ({ ...prev, [inn.innings_id]: v }))
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+                    <Field>
+                      <FieldLabel className="text-zinc-300 text-sm">Runs</FieldLabel>
+                      <Input
+                        type="number"
+                        value={state.runs}
+                        onChange={(e) => updateState({ runs: Number(e.target.value) })}
+                        className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                        placeholder="0"
+                      />
+                    </Field>
+
+                    <Field>
+                      <FieldLabel className="text-zinc-300 text-sm">Over</FieldLabel>
+                      <Input
+                        type="number"
+                        value={state.overNumber}
+                        onChange={(e) =>
+                          updateState({ overNumber: Number(e.target.value) })
                         }
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
-                          >
-                            {getBowlerLabel(inn.innings_id, state.bowler)}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
-                          <Command className="bg-zinc-950 text-white">
-                            <CommandInput placeholder="Search bowler..." className="text-white" />
-                            <CommandList>
-                              <CommandEmpty>No Bowler found.</CommandEmpty>
-                              <CommandGroup>
-                                {(state.allBowlers ?? []).map((b) => (
-                                  <CommandItem
-                                    className="text-white hover:bg-zinc-900"
-                                    key={b.player_id}
-                                    onSelect={() => {
-                                      updateState({
-                                        bowler: Number(b.player_id),
-                                      });
-                                      setOpenC((prev) => ({
-                                        ...prev,
-                                        [inn.innings_id]: false,
-                                      }));
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        state.bowler === b.player_id
-                                          ? "opacity-100 text-orange-500"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    {b.player_name}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </FieldContent>
-                  </Field>
+                        className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                      />
+                    </Field>
 
-                  <Field>
-                    <FieldLabel className="text-zinc-300 text-sm">Batsman</FieldLabel>
-                    <FieldContent>
-                      <Popover
-                        open={openB[inn.innings_id] || false}
-                        onOpenChange={(v) =>
-                          setOpenB((prev) => ({ ...prev, [inn.innings_id]: v }))
+                    <Field>
+                      <FieldLabel className="text-zinc-300 text-sm">Ball</FieldLabel>
+                      <Input
+                        type="number"
+                        value={state.ballNumber}
+                        onChange={(e) =>
+                          updateState({ ballNumber: Number(e.target.value) })
                         }
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between bg-zinc-950 border-white/10 text-white hover:bg-zinc-900 hover:border-orange-500/50"
-                          >
-                            {getBatsmanLabel(inn.innings_id, state.batsman)}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
+                        className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
+                      />
+                    </Field>
 
-                        <PopoverContent className="w-full p-0 bg-zinc-950 border-white/10">
-                          <Command className="bg-zinc-950 text-white">
-                            <CommandInput placeholder="Search batsman..." className="text-white" />
-                            <CommandList>
-                              <CommandEmpty>No Batsman found.</CommandEmpty>
-                              <CommandGroup>
-                                {(state.allBatsmen ?? []).map((b) => (
-                                  <CommandItem
-                                    className="text-white hover:bg-zinc-900"
-                                    key={b.player_id}
-                                    onSelect={() => {
-                                      updateState({
-                                        batsman: Number(b.player_id),
-                                      });
-                                      setOpenB((prev) => ({
-                                        ...prev,
-                                        [inn.innings_id]: false,
-                                      }));
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        state.batsman === b.player_id
-                                          ? "opacity-100 text-orange-500"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    {b.player_name}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </FieldContent>
-                  </Field>
-                </div>
+                    <label className="flex items-center gap-2 p-3 bg-zinc-950 rounded-lg border border-white/10 cursor-pointer hover:border-red-500/50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={state.wicket}
+                        onChange={(e) => updateState({ wicket: e.target.checked })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm font-medium text-zinc-300">Wicket</span>
+                    </label>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
-                  <Field>
-                    <FieldLabel className="text-zinc-300 text-sm">Runs</FieldLabel>
-                    <Input
-                      type="number"
-                      value={state.runs}
-                      onChange={(e) => updateState({ runs: Number(e.target.value) })}
-                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
-                      placeholder="0"
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel className="text-zinc-300 text-sm">Over</FieldLabel>
-                    <Input
-                      type="number"
-                      value={state.overNumber}
-                      onChange={(e) =>
-                        updateState({ overNumber: Number(e.target.value) })
-                      }
-                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel className="text-zinc-300 text-sm">Ball</FieldLabel>
-                    <Input
-                      type="number"
-                      value={state.ballNumber}
-                      onChange={(e) =>
-                        updateState({ ballNumber: Number(e.target.value) })
-                      }
-                      className="bg-zinc-950 border-white/10 text-white focus:border-orange-500/50"
-                    />
-                  </Field>
-
-                  <label className="flex items-center gap-2 p-3 bg-zinc-950 rounded-lg border border-white/10 cursor-pointer hover:border-red-500/50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={state.wicket}
-                      onChange={(e) => updateState({ wicket: e.target.checked })}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm font-medium text-zinc-300">Wicket</span>
-                  </label>
-
-                  <Button
-                    onClick={() => handleSubmitBall(inn.innings_id)}
-                    disabled={loading || !state.batsman || !state.bowler}
-                    className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 hover:opacity-90 text-white font-bold disabled:opacity-50"
-                  >
-                    {loading ? "Submitting..." : "Submit Ball"}
-                  </Button>
+                    <Button
+                      onClick={() => handleSubmitBall(inn.innings_id)}
+                      disabled={loading || !state.batsman || !state.bowler}
+                      className="bg-gradient-to-r from-orange-500 via-red-500 to-purple-600 hover:opacity-90 text-white font-bold disabled:opacity-50"
+                    >
+                      {loading ? "Submitting..." : "Submit Ball"}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Balls History */}
             <div className="p-6">
@@ -532,14 +536,16 @@ export default function Commentary({ innings }: { innings: Innings[] }) {
                                   <span className="text-zinc-500 mx-2">to</span>
                                   <span className="font-medium text-white">{ball.batsman.player_name}</span>
                                 </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleEditBall(ball, inn.innings_id)}
-                                  className="bg-zinc-900 border-white/10 text-white hover:bg-zinc-800 hover:border-orange-500/50"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
+                                {isAdmin && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditBall(ball, inn.innings_id)}
+                                    className="bg-zinc-900 border-white/10 text-white hover:bg-zinc-800 hover:border-orange-500/50"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </div>
                             ))}
                         </div>
