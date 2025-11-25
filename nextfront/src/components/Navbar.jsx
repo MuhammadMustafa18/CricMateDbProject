@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: "/teams", label: "Teams" },
     { href: "/players", label: "Players" },
     { href: "/tournaments", label: "Tournaments" },
+    { href: "/admin/auth", label: "Admin" },
   ];
 
   return (
