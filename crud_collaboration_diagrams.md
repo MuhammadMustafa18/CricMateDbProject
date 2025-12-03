@@ -7,37 +7,37 @@ This document contains collaboration diagrams for all CRUD operations in the Cri
 ## CREATE Operation - Collaboration Diagram
 
 ```mermaid
-graph LR
-    User((User))
-    Frontend[Frontend Component<br/>addplayer/page.tsx]
-    Auth[Supabase Auth]
-    Controller[PlayerController]
-    Service[PlayerService]
-    Repository[PlayerRepository]
-    Database[(PostgreSQL<br/>Database)]
+graph TB
+    User["👤 User"]
+    Frontend["📱 Frontend<br/>(addplayer/page.tsx)"]
+    Auth["🔐 Supabase Auth"]
+    Controller["🎮 PlayerController"]
+    Service["⚙️ PlayerService"]
+    Repository["💾 PlayerRepository"]
+    Database["🗄️ PostgreSQL"]
     
-    User -->|1: Navigate to /addplayer| Frontend
-    Frontend -->|2: getSession| Auth
-    Auth -->|3: return session + is_admin| Frontend
-    Frontend -->|4: Display form| User
-    User -->|5: Fill form & submit| Frontend
-    Frontend -->|6: POST /players<br/>{player data}| Controller
-    Controller -->|7: savePlayer(player)| Service
-    Service -->|8: save(player)| Repository
-    Repository -->|9: INSERT INTO players| Database
-    Database -->|10: return player_id| Repository
-    Repository -->|11: return Player entity| Service
-    Service -->|12: return Player entity| Controller
-    Controller -->|13: 200 OK + Player JSON| Frontend
-    Frontend -->|14: Success toast + reset form| User
+    User ---|"1: Navigate to /addplayer"| Frontend
+    Frontend ---|"2: getSession()"| Auth
+    Auth ---|"3: session + is_admin"| Frontend
+    Frontend ---|"4: Display form"| User
+    User ---|"5: Fill & submit"| Frontend
+    Frontend ---|"6: POST /players"| Controller
+    Controller ---|"7: savePlayer()"| Service
+    Service ---|"8: save()"| Repository
+    Repository ---|"9: INSERT"| Database
+    Database ---|"10: player_id"| Repository
+    Repository ---|"11: Player"| Service
+    Service ---|"12: Player"| Controller
+    Controller ---|"13: 200 OK"| Frontend
+    Frontend ---|"14: Success toast"| User
     
-    style User fill:#e1f5ff
-    style Frontend fill:#fff4e1
-    style Auth fill:#f0e1ff
-    style Controller fill:#ffe1e1
-    style Service fill:#e1ffe1
-    style Repository fill:#ffe1f5
-    style Database fill:#e1e1e1
+    style User fill:#e1f5ff,stroke:#0066cc,stroke-width:2px
+    style Frontend fill:#fff4e1,stroke:#ff9900,stroke-width:2px
+    style Auth fill:#f0e1ff,stroke:#9933ff,stroke-width:2px
+    style Controller fill:#ffe1e1,stroke:#ff3333,stroke-width:2px
+    style Service fill:#e1ffe1,stroke:#33cc33,stroke-width:2px
+    style Repository fill:#ffe1f5,stroke:#ff66cc,stroke-width:2px
+    style Database fill:#e1e1e1,stroke:#666666,stroke-width:2px
 ```
 
 ### Object Interactions (CREATE)
@@ -62,35 +62,33 @@ graph LR
 ## READ Operation - Collaboration Diagram
 
 ```mermaid
-graph LR
-    User((User))
-    Frontend[Frontend Component<br/>Players.tsx]
-    Controller[PlayerController]
-    Service[PlayerService]
-    Repository[PlayerRepository]
-    Database[(PostgreSQL<br/>Database)]
+graph TB
+    User["👤 User"]
+    Frontend["📱 Frontend<br/>(Players.tsx)"]
+    Controller["🎮 PlayerController"]
+    Service["⚙️ PlayerService"]
+    Repository["💾 PlayerRepository"]
+    Database["🗄️ PostgreSQL"]
     
-    User -->|1: Navigate to /players| Frontend
-    Frontend -->|2: useEffect triggers| Frontend
-    Frontend -->|3: GET /players| Controller
-    Controller -->|4: getAllPlayers| Service
-    Service -->|5: findAll| Repository
-    Repository -->|6: SELECT * FROM players| Database
-    Database -->|7: return player rows| Repository
-    Repository -->|8: return List<Player>| Service
-    Service -->|9: return List<Player>| Controller
-    Controller -->|10: 200 OK + JSON array| Frontend
-    Frontend -->|11: setPlayers(data)| Frontend
-    Frontend -->|12: Display player cards| User
-    User -->|13: Search/filter (optional)| Frontend
-    Frontend -->|14: Update filtered display| User
+    User ---|"1: Navigate to /players"| Frontend
+    Frontend ---|"2: useEffect()"| Frontend
+    Frontend ---|"3: GET /players"| Controller
+    Controller ---|"4: getAllPlayers()"| Service
+    Service ---|"5: findAll()"| Repository
+    Repository ---|"6: SELECT *"| Database
+    Database ---|"7: rows"| Repository
+    Repository ---|"8: List<Player>"| Service
+    Service ---|"9: List<Player>"| Controller
+    Controller ---|"10: 200 OK"| Frontend
+    Frontend ---|"11: setState()"| Frontend
+    Frontend ---|"12: Display cards"| User
     
-    style User fill:#e1f5ff
-    style Frontend fill:#fff4e1
-    style Controller fill:#ffe1e1
-    style Service fill:#e1ffe1
-    style Repository fill:#ffe1f5
-    style Database fill:#e1e1e1
+    style User fill:#e1f5ff,stroke:#0066cc,stroke-width:2px
+    style Frontend fill:#fff4e1,stroke:#ff9900,stroke-width:2px
+    style Controller fill:#ffe1e1,stroke:#ff3333,stroke-width:2px
+    style Service fill:#e1ffe1,stroke:#33cc33,stroke-width:2px
+    style Repository fill:#ffe1f5,stroke:#ff66cc,stroke-width:2px
+    style Database fill:#e1e1e1,stroke:#666666,stroke-width:2px
 ```
 
 ### Object Interactions (READ)
@@ -115,44 +113,44 @@ graph LR
 ## UPDATE Operation - Collaboration Diagram
 
 ```mermaid
-graph LR
-    User((User))
-    Frontend[Frontend Component<br/>Edit Form]
-    Auth[Supabase Auth]
-    Controller[PlayerController]
-    Service[PlayerService]
-    Repository[PlayerRepository]
-    Database[(PostgreSQL<br/>Database)]
+graph TB
+    User["👤 User"]
+    Frontend["📱 Frontend<br/>(Edit Form)"]
+    Auth["🔐 Supabase Auth"]
+    Controller["🎮 PlayerController"]
+    Service["⚙️ PlayerService"]
+    Repository["💾 PlayerRepository"]
+    Database["🗄️ PostgreSQL"]
     
-    User -->|1: Navigate to edit page| Frontend
-    Frontend -->|2: Check admin status| Auth
-    Auth -->|3: return is_admin = true| Frontend
-    Frontend -->|4: GET /players/{id}| Controller
-    Controller -->|5: return current data| Frontend
-    Frontend -->|6: Display pre-filled form| User
-    User -->|7: Modify fields & submit| Frontend
-    Frontend -->|8: PATCH /players/{id}<br/>{updated fields}| Controller
-    Controller -->|9: updatePlayer(id, updates)| Service
-    Service -->|10: findById(id)| Repository
-    Repository -->|11: SELECT WHERE player_id| Database
-    Database -->|12: return player record| Repository
-    Repository -->|13: return Player entity| Service
-    Service -->|14: Apply updates| Service
-    Service -->|15: save(updatedPlayer)| Repository
-    Repository -->|16: UPDATE players SET ...| Database
-    Database -->|17: return updated record| Repository
-    Repository -->|18: return Player entity| Service
-    Service -->|19: return Player entity| Controller
-    Controller -->|20: 200 OK + Player JSON| Frontend
-    Frontend -->|21: Success toast| User
+    User ---|"1: Navigate to edit"| Frontend
+    Frontend ---|"2: Check admin"| Auth
+    Auth ---|"3: is_admin=true"| Frontend
+    Frontend ---|"4: GET /{id}"| Controller
+    Controller ---|"5: current data"| Frontend
+    Frontend ---|"6: Pre-filled form"| User
+    User ---|"7: Modify & submit"| Frontend
+    Frontend ---|"8: PATCH /{id}"| Controller
+    Controller ---|"9: updatePlayer()"| Service
+    Service ---|"10: findById()"| Repository
+    Repository ---|"11: SELECT"| Database
+    Database ---|"12: record"| Repository
+    Repository ---|"13: Player"| Service
+    Service ---|"14: Apply updates"| Service
+    Service ---|"15: save()"| Repository
+    Repository ---|"16: UPDATE"| Database
+    Database ---|"17: updated"| Repository
+    Repository ---|"18: Player"| Service
+    Service ---|"19: Player"| Controller
+    Controller ---|"20: 200 OK"| Frontend
+    Frontend ---|"21: Success"| User
     
-    style User fill:#e1f5ff
-    style Frontend fill:#fff4e1
-    style Auth fill:#f0e1ff
-    style Controller fill:#ffe1e1
-    style Service fill:#e1ffe1
-    style Repository fill:#ffe1f5
-    style Database fill:#e1e1e1
+    style User fill:#e1f5ff,stroke:#0066cc,stroke-width:2px
+    style Frontend fill:#fff4e1,stroke:#ff9900,stroke-width:2px
+    style Auth fill:#f0e1ff,stroke:#9933ff,stroke-width:2px
+    style Controller fill:#ffe1e1,stroke:#ff3333,stroke-width:2px
+    style Service fill:#e1ffe1,stroke:#33cc33,stroke-width:2px
+    style Repository fill:#ffe1f5,stroke:#ff66cc,stroke-width:2px
+    style Database fill:#e1e1e1,stroke:#666666,stroke-width:2px
 ```
 
 ### Object Interactions (UPDATE)
@@ -184,38 +182,38 @@ graph LR
 ## DELETE Operation - Collaboration Diagram
 
 ```mermaid
-graph LR
-    User((User))
-    Frontend[Frontend Component<br/>Player Detail Page]
-    Auth[Supabase Auth]
-    Controller[PlayerController]
-    Service[PlayerService]
-    Repository[PlayerRepository]
-    Database[(PostgreSQL<br/>Database)]
+graph TB
+    User["👤 User"]
+    Frontend["📱 Frontend<br/>(Player Detail)"]
+    Auth["🔐 Supabase Auth"]
+    Controller["🎮 PlayerController"]
+    Service["⚙️ PlayerService"]
+    Repository["💾 PlayerRepository"]
+    Database["🗄️ PostgreSQL"]
     
-    User -->|1: Click delete button| Frontend
-    Frontend -->|2: Check admin status| Auth
-    Auth -->|3: return is_admin = true| Frontend
-    Frontend -->|4: Show confirmation dialog| User
-    User -->|5: Confirm deletion| Frontend
-    Frontend -->|6: DELETE /players/{id}| Controller
-    Controller -->|7: deletePlayerById(id)| Service
-    Service -->|8: deleteById(id)| Repository
-    Repository -->|9: DELETE FROM players<br/>WHERE player_id = ?| Database
-    Database -->|10: Confirm deletion| Repository
-    Repository -->|11: return void| Service
-    Service -->|12: return void| Controller
-    Controller -->|13: 204 No Content| Frontend
-    Frontend -->|14: Success toast| User
-    Frontend -->|15: Redirect to /players| User
+    User ---|"1: Click delete"| Frontend
+    Frontend ---|"2: Check admin"| Auth
+    Auth ---|"3: is_admin=true"| Frontend
+    Frontend ---|"4: Confirm dialog"| User
+    User ---|"5: Confirm"| Frontend
+    Frontend ---|"6: DELETE /{id}"| Controller
+    Controller ---|"7: deleteById()"| Service
+    Service ---|"8: deleteById()"| Repository
+    Repository ---|"9: DELETE"| Database
+    Database ---|"10: Confirmed"| Repository
+    Repository ---|"11: void"| Service
+    Service ---|"12: void"| Controller
+    Controller ---|"13: 204"| Frontend
+    Frontend ---|"14: Success"| User
+    Frontend ---|"15: Redirect"| User
     
-    style User fill:#e1f5ff
-    style Frontend fill:#fff4e1
-    style Auth fill:#f0e1ff
-    style Controller fill:#ffe1e1
-    style Service fill:#e1ffe1
-    style Repository fill:#ffe1f5
-    style Database fill:#e1e1e1
+    style User fill:#e1f5ff,stroke:#0066cc,stroke-width:2px
+    style Frontend fill:#fff4e1,stroke:#ff9900,stroke-width:2px
+    style Auth fill:#f0e1ff,stroke:#9933ff,stroke-width:2px
+    style Controller fill:#ffe1e1,stroke:#ff3333,stroke-width:2px
+    style Service fill:#e1ffe1,stroke:#33cc33,stroke-width:2px
+    style Repository fill:#ffe1f5,stroke:#ff66cc,stroke-width:2px
+    style Database fill:#e1e1e1,stroke:#666666,stroke-width:2px
 ```
 
 ### Object Interactions (DELETE)

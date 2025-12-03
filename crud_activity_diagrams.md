@@ -7,43 +7,34 @@ This document contains activity diagrams for all CRUD operations in the CricMate
 ## CREATE Operation - Activity Diagram
 
 ```mermaid
-flowchart TD
-    Start([User Navigates to Add Player Page]) --> CheckAuth{Is User<br/>Authenticated?}
-    CheckAuth -->|No| RedirectLogin[Redirect to Login]
-    RedirectLogin --> End1([End])
+sequenceDiagram
+    participant User
+    participant Frontend as Next.js Frontend<br/>/addplayer/page.tsx
+    participant Auth as Supabase Auth
+    participant API as Spring Boot API<br/>PlayerController
+    participant Service as PlayerService
+    participant Repo as PlayerRepository<br/>(JPA)
+    participant DB as PostgreSQL
+
+    User->>Frontend: Navigate to /addplayer
+    Frontend->>Auth: Check session & admin status
+    Auth-->>Frontend: Session + is_admin flag
     
-    CheckAuth -->|Yes| CheckAdmin{Is User<br/>Admin?}
-    CheckAdmin -->|No| ShowError[Show Error Toast]
-    ShowError --> RedirectHome[Redirect to Home]
-    RedirectHome --> End2([End])
-    
-    CheckAdmin -->|Yes| DisplayForm[Display Player Form]
-    DisplayForm --> UserFillsForm[User Fills Form Fields]
-    UserFillsForm --> UserSubmits[User Submits Form]
-    UserSubmits --> ValidateForm{Form Valid?}
-    
-    ValidateForm -->|No| ShowValidationError[Show Validation Errors]
-    ShowValidationError --> DisplayForm
-    
-    ValidateForm -->|Yes| SendPOST[Send POST Request to /players]
-    SendPOST --> ControllerReceives[Controller Receives Request]
-    ControllerReceives --> ServiceSave[Service Layer: savePlayer]
-    ServiceSave --> RepoSave[Repository: save]
-    RepoSave --> DBInsert[Database: INSERT INTO players]
-    
-    DBInsert --> DBSuccess{Insert<br/>Successful?}
-    DBSuccess -->|No| DBError[Database Error]
-    DBError --> ReturnError[Return Error Response]
-    ReturnError --> ShowErrorToast[Show Error Toast]
-    ShowErrorToast --> End3([End])
-    
-    DBSuccess -->|Yes| ReturnPlayer[Return Player Object with ID]
-    ReturnPlayer --> ServiceReturn[Service Returns Player]
-    ServiceReturn --> ControllerReturn[Controller Returns 200 OK]
-    ControllerReturn --> FrontendReceives[Frontend Receives Response]
-    FrontendReceives --> ShowSuccess[Show Success Toast]
-    ShowSuccess --> ResetForm[Reset Form Fields]
-    ResetForm --> End4([End])
+    alt Not Admin
+        Frontend->>User: Redirect to home with error toast
+    else Is Admin
+        Frontend->>User: Display form
+        User->>Frontend: Fill form & submit
+        Frontend->>API: POST /players<br/>{player_name, full_name, ...}
+        API->>Service: savePlayer(player)
+        Service->>Repo: save(player)
+        Repo->>DB: INSERT INTO players
+        DB-->>Repo: New player record
+        Repo-->>Service: Player entity
+        Service-->>API: Player entity
+        API-->>Frontend: 200 OK + Player JSON
+        Frontend->>User: Success toast + form reset
+    end
 ```
 
 ---
@@ -51,37 +42,24 @@ flowchart TD
 ## READ Operation - Activity Diagram
 
 ```mermaid
-flowchart TD
-    Start([User Navigates to Players Page]) --> PageLoad[Page Component Mounts]
-    PageLoad --> InitFetch[Initialize Data Fetch]
-    InitFetch --> SendGET[Send GET Request to /players]
-    
-    SendGET --> ControllerReceives[Controller Receives Request]
-    ControllerReceives --> ServiceGetAll[Service Layer: getAllPlayers]
-    ServiceGetAll --> RepoFindAll[Repository: findAll]
-    RepoFindAll --> DBSelect[Database: SELECT * FROM players]
-    
-    DBSelect --> DBSuccess{Query<br/>Successful?}
-    DBSuccess -->|No| DBError[Database Error]
-    DBError --> ReturnError[Return Error Response]
-    ReturnError --> ShowError[Show Error Message]
-    ShowError --> End1([End])
-    
-    DBSuccess -->|Yes| MapToEntities[Map Rows to Player Entities]
-    MapToEntities --> ReturnList[Return List of Players]
-    ReturnList --> ServiceReturn[Service Returns List]
-    ServiceReturn --> ControllerReturn[Controller Returns 200 OK + JSON]
-    ControllerReturn --> FrontendReceives[Frontend Receives Response]
-    
-    FrontendReceives --> SetState[Update State with Players]
-    SetState --> RenderCards[Render Player Cards]
-    RenderCards --> UserSearch{User Uses<br/>Search?}
-    
-    UserSearch -->|Yes| FilterPlayers[Filter Players by Search Term]
-    FilterPlayers --> UpdateDisplay[Update Displayed Cards]
-    UpdateDisplay --> End2([End])
-    
-    UserSearch -->|No| End3([End])
+sequenceDiagram
+    participant User
+    participant Frontend as Next.js Frontend<br/>/players/page.tsx
+    participant API as PlayerController
+    participant Service as PlayerService
+    participant Repo as PlayerRepository
+    participant DB as PostgreSQL
+
+    User->>Frontend: Navigate to /players
+    Frontend->>API: GET /players
+    API->>Service: getAllPlayers()
+    Service->>Repo: findAll()
+    Repo->>DB: SELECT * FROM players
+    DB-->>Repo: List of player records
+    Repo-->>Service: List<Player>
+    Service-->>API: List<Player>
+    API-->>Frontend: 200 OK + JSON array
+    Frontend->>User: Display player cards
 ```
 
 ---
@@ -89,54 +67,34 @@ flowchart TD
 ## UPDATE Operation - Activity Diagram
 
 ```mermaid
-flowchart TD
-    Start([User Navigates to Edit Player Page]) --> CheckAuth{Is User<br/>Authenticated?}
-    CheckAuth -->|No| RedirectLogin[Redirect to Login]
-    RedirectLogin --> End1([End])
-    
-    CheckAuth -->|Yes| CheckAdmin{Is User<br/>Admin?}
-    CheckAdmin -->|No| ShowError[Show Error Toast]
-    ShowError --> RedirectHome[Redirect to Home]
-    RedirectHome --> End2([End])
-    
-    CheckAdmin -->|Yes| FetchCurrent[Send GET /players/{id}]
-    FetchCurrent --> ReceiveCurrent[Receive Current Player Data]
-    ReceiveCurrent --> PreFillForm[Pre-fill Form with Current Data]
-    PreFillForm --> DisplayForm[Display Editable Form]
-    
-    DisplayForm --> UserModifies[User Modifies Fields]
-    UserModifies --> UserSubmits[User Submits Form]
-    UserSubmits --> ValidateForm{Form Valid?}
-    
-    ValidateForm -->|No| ShowValidationError[Show Validation Errors]
-    ShowValidationError --> DisplayForm
-    
-    ValidateForm -->|Yes| SendPATCH[Send PATCH Request to /players/{id}]
-    SendPATCH --> ControllerReceives[Controller Receives Request]
-    ControllerReceives --> ServiceUpdate[Service Layer: updatePlayer]
-    ServiceUpdate --> RepoFindById[Repository: findById]
-    
-    RepoFindById --> PlayerExists{Player<br/>Found?}
-    PlayerExists -->|No| NotFoundError[Return 404 Not Found]
-    NotFoundError --> ShowNotFound[Show Error Toast]
-    ShowNotFound --> End3([End])
-    
-    PlayerExists -->|Yes| ApplyUpdates[Apply Updates to Entity]
-    ApplyUpdates --> RepoSave[Repository: save]
-    RepoSave --> DBUpdate[Database: UPDATE players SET ...]
-    
-    DBUpdate --> DBSuccess{Update<br/>Successful?}
-    DBSuccess -->|No| DBError[Database Error]
-    DBError --> ReturnError[Return Error Response]
-    ReturnError --> ShowErrorToast[Show Error Toast]
-    ShowErrorToast --> End4([End])
-    
-    DBSuccess -->|Yes| ReturnUpdated[Return Updated Player]
-    ReturnUpdated --> ServiceReturn[Service Returns Player]
-    ServiceReturn --> ControllerReturn[Controller Returns 200 OK]
-    ControllerReturn --> FrontendReceives[Frontend Receives Response]
-    FrontendReceives --> ShowSuccess[Show Success Toast]
-    ShowSuccess --> End5([End])
+sequenceDiagram
+    participant User
+    participant Frontend as Edit Form
+    participant Auth as Supabase Auth
+    participant API as PlayerController
+    participant Service as PlayerService
+    participant Repo as PlayerRepository
+    participant DB as PostgreSQL
+
+    User->>Frontend: Navigate to edit page
+    Frontend->>Auth: Check admin status
+    Auth-->>Frontend: is_admin = true
+    Frontend->>API: GET /players/{id}
+    API-->>Frontend: Current player data
+    Frontend->>User: Display pre-filled form
+    User->>Frontend: Modify fields & submit
+    Frontend->>API: PATCH /players/{id}<br/>{updated fields}
+    API->>Service: updatePlayer(id, updates)
+    Service->>Repo: findById(id)
+    Repo-->>Service: Existing player
+    Service->>Service: Apply updates
+    Service->>Repo: save(updatedPlayer)
+    Repo->>DB: UPDATE players SET ...
+    DB-->>Repo: Updated record
+    Repo-->>Service: Player entity
+    Service-->>API: Player entity
+    API-->>Frontend: 200 OK + Player JSON
+    Frontend->>User: Success toast
 ```
 
 ---
@@ -144,42 +102,29 @@ flowchart TD
 ## DELETE Operation - Activity Diagram
 
 ```mermaid
-flowchart TD
-    Start([User Clicks Delete Button]) --> CheckAuth{Is User<br/>Authenticated?}
-    CheckAuth -->|No| RedirectLogin[Redirect to Login]
-    RedirectLogin --> End1([End])
-    
-    CheckAuth -->|Yes| CheckAdmin{Is User<br/>Admin?}
-    CheckAdmin -->|No| ShowError[Show Error Toast]
-    ShowError --> End2([End])
-    
-    CheckAdmin -->|Yes| ShowConfirm{User Confirms<br/>Deletion?}
-    ShowConfirm -->|No| CancelDelete[Cancel Deletion]
-    CancelDelete --> End3([End])
-    
-    ShowConfirm -->|Yes| SendDELETE[Send DELETE Request to /players/{id}]
-    SendDELETE --> ControllerReceives[Controller Receives Request]
-    ControllerReceives --> ServiceDelete[Service Layer: deletePlayerById]
-    ServiceDelete --> RepoDelete[Repository: deleteById]
-    RepoDelete --> DBDelete[Database: DELETE FROM players WHERE ...]
-    
-    DBDelete --> DBSuccess{Delete<br/>Successful?}
-    DBSuccess -->|No| DBError[Database Error]
-    DBError --> CheckConstraint{Foreign Key<br/>Constraint?}
-    
-    CheckConstraint -->|Yes| ShowConstraintError[Show Cannot Delete Message]
-    ShowConstraintError --> End4([End])
-    
-    CheckConstraint -->|No| ShowGenericError[Show Error Toast]
-    ShowGenericError --> End5([End])
-    
-    DBSuccess -->|Yes| ReturnVoid[Return 204 No Content]
-    ReturnVoid --> ServiceReturn[Service Returns]
-    ServiceReturn --> ControllerReturn[Controller Returns Success]
-    ControllerReturn --> FrontendReceives[Frontend Receives Response]
-    FrontendReceives --> ShowSuccess[Show Success Toast]
-    ShowSuccess --> RedirectList[Redirect to Players List]
-    RedirectList --> End6([End])
+sequenceDiagram
+    participant User
+    participant Frontend as Player Detail Page
+    participant Auth as Supabase Auth
+    participant API as PlayerController
+    participant Service as PlayerService
+    participant Repo as PlayerRepository
+    participant DB as PostgreSQL
+
+    User->>Frontend: Click delete button
+    Frontend->>Auth: Check admin status
+    Auth-->>Frontend: is_admin = true
+    Frontend->>User: Show confirmation dialog
+    User->>Frontend: Confirm deletion
+    Frontend->>API: DELETE /players/{id}
+    API->>Service: deletePlayerById(id)
+    Service->>Repo: deleteById(id)
+    Repo->>DB: DELETE FROM players WHERE player_id = ?
+    DB-->>Repo: Deletion confirmed
+    Repo-->>Service: void
+    Service-->>API: void
+    API-->>Frontend: 204 No Content
+    Frontend->>User: Success toast + redirect
 ```
 
 ---
